@@ -1,0 +1,63 @@
+language: java
+sudo: required
+os: linux
+dist: trusty
+
+branches:
+  only:
+    - master
+    - "/^\\d+\\.\\d+\\.\\d+$/"
+env:
+  global:
+    - PROJECT_VERSION="default"
+
+jdk:
+  - oraclejdk8
+
+services:
+  - docker
+
+script:
+  - mvn compile
+  - mvn test
+  - mvn cobertura:cobertura
+  - mvn package
+
+after_success:
+  - mvn site
+  #- bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
+  #- dockerbuild/update.sh
+  - PROJECT_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+  #- cp gen_dockerfile/files/Dockerfile ${HOME}/
+  #- cp target/devops-${PROJECT_VERSION}-jar-with-dependencies.jar ${HOME}/
+  - cp src/main/resources/data.csv ${HOME}/
+  - java -jar ${HOME}/devops-${PROJECT_VERSION}-jar-with-dependencies.jar
+
+deploy:
+  #- provider: releases
+  #  skip_cleanup: true
+  #  keep_history: true
+  #  overwrite: true
+  #  api_key:
+  #    - secure: RySvUF4AQMp/Fwm7tPbLXvkycgR9ETelOcVNuERTzALXVreqIHYsLJr3i/aCPAM1mMpNCyr+zlnj5wUI/2XEl+vdu1ebQFN6G7nnSfrAvpiVBLLCM0KJ3fP454XfjTHeypTkvLxP3AY+7hnjAqpB+P4nwDvW6Xi5ZouGesNyGQtBRpd3wZrx8STBCcoEKw36tXbZ0rxMrrNFtFkGztIoi5DEUx9USt1lOOyr2uslJHKIGT4QSTuVz7R9NsBNCIq8UeGqd2iqT9AdLFqsp0sOQHDxAglg+JpBW45YHznVAf7O4XjwHukM9RwjtmLyeQyEv33H0pMKD3hGngApn+nd+kDwv9755I/UdJguvgd91L4lAC1I/IcB5Fu761HtyG4sTSyS2FOfmpemM6Z2anNDncsSLLP+PVJHbMZZ5KxpA1OjctQ6x8duoU3AJ9F5zetxbLz7/0OM+n2fclF9qceVOZwca0CqKYRcHcOp9614fsSO1s0tmrKgQz3KAVa1rUOIK6clZJ7qVIX+ffIwStyDSe3yczMg0Hh4m4EM/l49ZrRFkyiZ7iKvdu4X7ywhGu+pWvVLxbSIIe+SD3+gH6OeLz4eMNaWLTe4zpH4qNvLIRy2OghXk5U8d5flOE3JzCOhestd9zI9OVyG70Yp7iuvQpTRd657jZSfSx3NLdChzxw=
+  #  file: "${HOME}/devops-${PROJECT_VERSION}-jar-with-dependencies.jar"
+  #  on:
+  #    tags: true
+  #    repo: A-Julien/devops
+
+  - provider: pages
+    skip_cleanup: true
+    local_dir: target/site
+    github_token: "$GH_TOKEN"
+    keep_history: true
+    on:
+      tags: false
+      branch: master
+
+  - provider: script
+    skip_cleanup: true
+    keep_history: true
+    script: bash git_push.sh
+    on:
+      tags: false
+      branch: master
