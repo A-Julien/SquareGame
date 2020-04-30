@@ -11,10 +11,10 @@ public class ZoneFx extends Zone{
     public ColorPicker colorPicker;
     EventHandler<ActionEvent> eventColorPicker;
 
-
     public ZoneFx(String nom, Color color){
         super(nom, color);
         this.colorPicker = new ColorPicker();
+        colorPicker.setValue(color);
         positionGrille = new ArrayList<>();
     }
 
@@ -33,4 +33,6 @@ public class ZoneFx extends Zone{
     public void setEventColorPicker(EventHandler<ActionEvent> eventColorPicker) {
         colorPicker.setOnAction(eventColorPicker);
     }
+
+
 }
