@@ -19,9 +19,6 @@ jdk:
 
 script:
   - mvn compile
-  - mvn test
-  - mvn cobertura:cobertura
-  - mvn package
 
 after_success:
   - mvn site
