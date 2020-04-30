@@ -74,24 +74,12 @@ public class ZoneManager extends BorderPane {
             tableView.getItems().get(event.getTablePosition().getRow()).setIp(newName);
         });
 
-        TableColumn<ZoneFx, String> zonePort = new TableColumn<ZoneFx, String>("port");
-        zonePort.setCellValueFactory(new PropertyValueFactory<>("port"));
-
-        zonePort.setCellFactory(TextFieldTableCell.<ZoneFx>forTableColumn());
-        zonePort.setOnEditCommit((TableColumn.CellEditEvent<ZoneFx, String> event) -> {
-            //TablePosition<Zone, String> pos = event.getTablePosition();
-
-            String newName = event.getNewValue();
-            System.out.println("Modification en : " + newName);
-            tableView.getItems().get(event.getTablePosition().getRow()).setPort(newName);
 
 
 
-        });
 
 
-
-        tableView.getColumns().addAll(zoneName,cCol, zoneIP,zonePort);
+        tableView.getColumns().addAll(zoneName,cCol, zoneIP);
 
         eventColorPicker = e -> {
             System.out.println("Nouvelle couleur : " + ((ColorPicker) e.getTarget()).getValue());
