@@ -14,8 +14,8 @@ env:
 jdk:
   - oraclejdk8
 
-services:
-  - docker
+#services:
+#  - docker
 
 script:
   - mvn compile
@@ -30,8 +30,8 @@ after_success:
   - PROJECT_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
   #- cp gen_dockerfile/files/Dockerfile ${HOME}/
   #- cp target/devops-${PROJECT_VERSION}-jar-with-dependencies.jar ${HOME}/
-  - cp src/main/resources/data.csv ${HOME}/
-  - java -jar ${HOME}/devops-${PROJECT_VERSION}-jar-with-dependencies.jar
+  #- cp src/main/resources/data.csv ${HOME}/
+  #- java -jar ${HOME}/devops-${PROJECT_VERSION}-jar-with-dependencies.jar
 
 deploy:
   #- provider: releases
