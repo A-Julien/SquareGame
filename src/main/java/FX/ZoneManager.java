@@ -203,6 +203,7 @@ public class ZoneManager extends BorderPane {
 
 
         ArrayList<Zone> finalZone = new ArrayList();
+        boolean find = false;
         Zone z = null;
         for(int i = 0; i < grid.getX(); i++){
             for(int j = 0; j < grid.getY(); j++){
