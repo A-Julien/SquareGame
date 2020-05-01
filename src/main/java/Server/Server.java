@@ -1,9 +1,14 @@
 package Server;
 import Class.InformationsServeur;
 
+import Utils.Communication;
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
+import Class.Zone;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public class Server implements Runnable {
@@ -15,6 +20,7 @@ public class Server implements Runnable {
     private Channel broadcast;
 //    private Channel newClient;
     private Channel work;
+    private List<Zone> map;
 
     // Propre à chaque serveur
     private String uniqueServeurQueue;
@@ -44,7 +50,7 @@ public class Server implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("Server status : " + this.SERVER_NAME + " up");
+            this.log("status : " + this.SERVER_NAME + " up");
             this.initConnection();
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
@@ -54,11 +60,11 @@ public class Server implements Runnable {
     private void initQueuCommunication() throws IOException{
         work = connection.createChannel();
         uniqueServeurQueue = work.queueDeclare().getQueue();
-        System.out.println("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
+        this.log("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), "UTF-8");
 
-            System.out.println(" [x] Client talk to me '" + message + "'");
+            System.out.println("[x] Client talk to me '" + message + "'");
             try {
                 Thread.sleep(1000);
                 //doWork(message);
@@ -118,28 +124,33 @@ public class Server implements Runnable {
     private void initConnectionFANOUT() throws IOException, TimeoutException {
 
         this.broadcast = connection.createChannel();
-        broadcast.exchangeDeclare("BROADCAST", "fanout");
+        this.broadcast.exchangeDeclare("BROADCAST", "fanout");
         String queueName = broadcast.queueDeclare().getQueue();
-        broadcast.queueBind(queueName, "BROADCAST", "");
+        this.broadcast.queueBind(queueName, "BROADCAST", "");
 
         monitor = new Object();
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            String message = new String(delivery.getBody(), "UTF-8");
-            System.out.println(" [x] Received '" + message + "'");
+            this.log("Received map from manager");
+            try {
+                this.map = (ArrayList<Zone>) Communication.deserialize(delivery.getBody());
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
             synchronized (monitor) {
                 monitor.notify();
             }
-            initOk = true;
+            this.initOk = true;
         };
-        broadcast.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
+        this.broadcast.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
     }
 
-    private void initConnectionRPC() throws IOException, TimeoutException {
+    private void initConnectionRPC(){
             try (RPC_INIT rpcInit = new RPC_INIT(this.connection, this.RPC_INI_QUEUE_NAME, this.uniqueServeurQueue)) {
-                System.out.println(" [x] Requesting Initialisation from manager");
+                this.log("Requesting Initialisation from manager");
+                this.log("Getting data from manager");
                 this.informationsServeur = rpcInit.call();
-                System.out.println(" [.] Got IT");
+                this.log("Connection fully establish");
             } catch (IOException | TimeoutException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -158,6 +169,7 @@ public class Server implements Runnable {
         }
     }
 
-
-
+    private void log(String message){
+        System.out.println("[" + this.SERVER_NAME + "] " + message);
+    }
 }
