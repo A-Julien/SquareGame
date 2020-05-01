@@ -69,7 +69,7 @@ public class Server extends Console implements Runnable  {
         this.log("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
 
-            System.out.println("[x] Client talk to me '" + message + "'");
+
             try {
                 TaskServer t = (TaskServer) Communication.deserialize(delivery.getBody());
                 System.out.println(" [x] New Task there'" + t.toString() + "'");
