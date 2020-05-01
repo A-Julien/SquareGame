@@ -3,11 +3,9 @@ import Manager.Manager;
 import javafx.application.Application;
 import javafx.stage.*;
 import FX.Client;
-import javafx.geometry.*;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Logger;
 
 // assumes the current class is called MyLogger
 public class LaunchClient extends Application{

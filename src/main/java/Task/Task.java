@@ -1,19 +1,26 @@
-package Class;
+package Task;
 
-import com.rabbitmq.client.*;
-
-import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 
 
 public class Task implements Serializable {
-    public String device;
+    public TaskCommand cmdType;
+    public Object cmd;
+    public String replyQueu;
+
+    public Task(TaskCommand cmdType, String cmd, String replyQueu) {
+        this.cmdType = cmdType;
+        this.cmd = cmd;
+        this.replyQueu = replyQueu;
+    }
+
+    /*public String device;
     public int type; // 1 = MOVE; 2 = you Have A neihbgor ; 3 = Give Instruction to a client
     public String replyQueue;
     public PositionGrille pos;
     public String cmd;
     public String [] mots;
+
     public Task(String command, String replyQueue){
         this.cmd = command;
         this.replyQueue = replyQueue;
@@ -66,7 +73,7 @@ public class Task implements Serializable {
             msg +=  " " +mots[i];
         }
         return msg;
-    }
+    }*/
 
 
 

@@ -1,17 +1,12 @@
 package Server;
-import Class.PositionGrille;
-import FX.Case;
-import Class.Player;
-import com.rabbitmq.client.Channel;
+import Task.Task;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 public interface ServerReaction {
-    public String playerWantedToMove(Channel clientQueue, Channel fannout) throws IOException;
-    public void checkForNeighbors(PositionGrille p);
-    public boolean newPlayer();
-    public void forwardMessage();
-    public String print();
+    String playerWantedToMove(Task task) throws IOException;
+    //public void checkForNeighbors(PositionGrille p);
+    void computeFowardedTask(Task task);
+    void forwardMessage();
+    String print();
 }
-

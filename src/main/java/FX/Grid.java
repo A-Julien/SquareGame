@@ -1,9 +1,8 @@
 package FX;
-import Class.*;
+import Manager.Map.ZoneFx;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.control.Alert;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -11,10 +10,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 
 import java.awt.Point;
-import java.util.ArrayList;
 
 public class Grid extends Group {
-    Case[][] cases;
+    public Case[][] cases;
     private Group zoneSelection= new Group();
     private Group grille = new Group();
     private Rectangle zone = new Rectangle();
@@ -243,7 +241,7 @@ public class Grid extends Group {
 
     }
 
-    protected void rmHandlerSelection(){
+    public void rmHandlerSelection(){
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 cases[i][j].setOnMouseClicked(handlerShowInfoCell);

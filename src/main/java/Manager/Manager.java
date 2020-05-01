@@ -6,7 +6,7 @@ import Utils.Communication;
 import com.rabbitmq.client.*;
 import Exception.MapNotSetException;
 import Exception.ServerNotSetException;
-import Class.Zone;
+import Manager.Map.Zone;
 
 import java.io.IOException;
 import java.util.ArrayList;

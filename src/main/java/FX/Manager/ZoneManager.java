@@ -1,7 +1,11 @@
-package FX;
-import Class.*;
+package FX.Manager;
 
+import FX.Case;
+import FX.Grid;
+import FX.Map.PositionGrille;
+import Manager.Map.ZoneFx;
 import Manager.Manager;
+import Manager.Map.Zone;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -31,7 +35,7 @@ public class ZoneManager extends BorderPane {
 
     private Manager manager;
 
-    ZoneManager(Grid grid, Manager manager) {
+    public ZoneManager(Grid grid, Manager manager) {
         super();
 
         this.manager = manager;
@@ -185,7 +189,7 @@ public class ZoneManager extends BorderPane {
         }
     }
 
-    protected Button getLaunchButton(){
+    public Button getLaunchButton(){
         return launch;
     }
 
@@ -193,7 +197,7 @@ public class ZoneManager extends BorderPane {
      * Button start trigger
      * build the map and launch manager
      */
-    void eventLaunch(){
+    public void eventLaunch(){
         System.out.print("Build map");
         setTop(null);
         //toolBar = new ToolBar(print);

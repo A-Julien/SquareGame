@@ -1,6 +1,5 @@
 package FX;
-import Class.ZoneFx;
-import javafx.scene.Group;
+import Manager.Map.ZoneFx;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;

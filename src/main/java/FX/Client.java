@@ -1,9 +1,8 @@
 package FX;
 
-import Class.PositionGrille;
+import FX.Map.PositionGrille;
 import Configuration.RmqConfig;
-import Server.RPC_COMMUNICATION;
-import Server.TaskServer;
+
 import Utils.Communication;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -19,7 +18,7 @@ import javafx.scene.paint.Color;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-import Client.TaskClient;
+import Client.RPC_COMMUNICATION;
 
 public class Client extends Scene implements RmqConfig {
     BorderPane borderPane;
@@ -94,14 +93,14 @@ public class Client extends Scene implements RmqConfig {
 
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            try {
-                TaskClient t = (TaskClient) Communication.deserialize(delivery.getBody());
-                System.out.println(" [x] New Task there'" + t.toString() + "'");
+            /*try {
+                //TaskClient t = (TaskClient) Communication.deserialize(delivery.getBody());
+                //System.out.println(" [x] New Task there'" + t.toString() + "'");
                 //System.out.println(t.handle(envoyerInformation, myQueue));
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 System.out.println("Problem during task");
-            }
+            }*/
            // recevoirInformation.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 
         };
@@ -112,8 +111,8 @@ public class Client extends Scene implements RmqConfig {
     public void handleMouvement(PositionGrille mouvement) throws IOException {
         System.out.println("Déplacement souhaité : " + mouvement);
        // AskServer mouvement
-        TaskServer task = new TaskServer("MOVE " + mouvement.getX() +" " +mouvement.getY(), myQueue);
-        envoyerInformation.basicPublish("", queueCom, null, Communication.serialize(task));
+        //TaskServer task = new TaskServer("MOVE " + mouvement.getX() +" " +mouvement.getY(), myQueue);
+        //envoyerInformation.basicPublish("", queueCom, null, Communication.serialize(task));
 
         PositionGrille newP = new PositionGrille(pos.getX() + mouvement.getX(), pos.getY() + mouvement.getY());
         System.out.println(newP);
