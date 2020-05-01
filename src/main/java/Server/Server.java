@@ -19,11 +19,13 @@ import java.util.concurrent.TimeoutException;
 public class Server extends Console implements Runnable  {
     private String SERVER_NAME;
     private String RPC_INI_QUEUE_NAME;
+    private String BROADCAST_QUEUE;
     private ConnectionFactory factory;
     private Connection connection;
     private Channel information;
     private Channel broadcast;
     private Channel initMap;
+    private Channel talkBroadcast;
 //    private Channel newClient;
     private Channel work;
     private List<Zone> map;
@@ -66,7 +68,8 @@ public class Server extends Console implements Runnable  {
 
     private void initQueuCommunication() throws IOException{
         work = connection.createChannel();
-        uniqueServeurQueue = work.queueDeclare().getQueue();
+        uniqueServeurQueue =  work.queueDeclare("", true, false, false, null).getQueue();
+
         this.log("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
 
@@ -74,19 +77,19 @@ public class Server extends Console implements Runnable  {
             try {
                 TaskServer t = (TaskServer) Communication.deserialize(delivery.getBody());
                 System.out.println(" [x] New Task there'" + t.toString() + "'");
-                System.out.println(t.handle(work,broadcast));
+                System.out.println(t.handle(work,talkBroadcast));
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 System.out.println("Problem during task");
             }
-            work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+          //  work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 
 
 
 
 
         };
-        work.basicConsume(uniqueServeurQueue, false, deliverCallback, consumerTag -> { });
+        work.basicConsume(uniqueServeurQueue, true, deliverCallback, consumerTag -> { });
 
 
     }
@@ -104,21 +107,20 @@ public class Server extends Console implements Runnable  {
                     .correlationId(delivery.getProperties().getCorrelationId())
                     .build();
 
-            String response = "";
+
 
 
             System.out.println("New client there");
             information.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, uniqueServeurQueue.getBytes("UTF-8"));
-            information.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             // RabbitMq consumer worker thread notifies the RPC server owner thread
             synchronized (soloClient) {
-                soloClient.notify();
+              //  soloClient.notify();
             }
 
 
         };
 
-        information.basicConsume(POOL_CLIENT_QUEUE, false, deliverCallback, (consumerTag -> { }));
+        information.basicConsume(POOL_CLIENT_QUEUE, true, deliverCallback, (consumerTag -> { }));
     }
 
     private void initConnection() throws IOException, TimeoutException {
@@ -141,29 +143,30 @@ public class Server extends Console implements Runnable  {
     }
 
     private void initConnectionFANOUT() throws IOException, TimeoutException {
+        this.talkBroadcast = connection.createChannel();
+        this.talkBroadcast.exchangeDeclare("BROADCAST", "fanout");
 
         this.broadcast = connection.createChannel();
         this.broadcast.exchangeDeclare("BROADCAST", "fanout");
-        String queueName = broadcast.queueDeclare().getQueue();
-        this.broadcast.queueBind(queueName, "BROADCAST", "");
+        this.BROADCAST_QUEUE = broadcast.queueDeclare().getQueue();
+        this.broadcast.queueBind(BROADCAST_QUEUE, "BROADCAST", "");
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-
-
             try {
                 TaskServer t = (TaskServer) Communication.deserialize(delivery.getBody());
-                System.out.println(" [x] New Task there'" + t.toString() + "'");
-                System.out.println(t.handle(work,broadcast));
+                System.out.println(" [x] BOADCATS MESSAGE : '" + t.toString() + "'");
+                System.out.println(t.handle(work,talkBroadcast));
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-                System.out.println("Problem during task");
+                System.out.println("Problem during BROADCAST");
             }
-            work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+
 
         };
 
 
-        this.broadcast.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
+        this.broadcast.basicConsume(BROADCAST_QUEUE, true, deliverCallback, consumerTag -> { });
+
     }
 
     private void initConnectionInitMap() throws IOException, TimeoutException {

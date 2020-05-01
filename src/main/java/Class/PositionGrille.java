@@ -1,5 +1,7 @@
 package Class;
 
+import javafx.geometry.Pos;
+
 import java.io.Serializable;
 
 public class PositionGrille implements Serializable {
@@ -24,5 +26,14 @@ public class PositionGrille implements Serializable {
 
     public void setY(int y) {
         this.y = y;
+    }
+
+    @Override
+    public String toString() {
+        return "["+getX()+";"+getY()+"]";
+    }
+
+    public PositionGrille plus(PositionGrille p){
+        return new PositionGrille(x + p.getX(), y + p.getX());
     }
 }

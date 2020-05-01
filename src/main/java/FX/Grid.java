@@ -30,15 +30,17 @@ public class Grid extends Group {
 
     private Circle player;
 
+    private boolean manager;
 
 
-    Grid(int nbCaseHauteur, int nbCaseLargeur, double hauteurPX, double largeurPx) {
+    Grid(int nbCaseHauteur, int nbCaseLargeur, double hauteurPX, double largeurPx, boolean manager) {
         this.x = nbCaseLargeur;
         this.y = nbCaseHauteur;
         this.largeurCase = largeurPx / nbCaseLargeur;
         //this.largeurCase = this.compute / nbCaseHauteur
         this.hauteurCase = hauteurPX / nbCaseHauteur;
        // this.hauteurCase = maxHeight() / nbCaseHauteur;
+        this.manager = manager;
 
 
 
@@ -47,7 +49,10 @@ public class Grid extends Group {
         this.getChildren().addAll(zoneSelection,grille);
         afficherCases();
         grille.setOpacity(0.5);
-        zoneSelection.getChildren().add(zone);
+        if(manager){
+            zoneSelection.getChildren().add(zone);
+        }
+
 
         player = new Circle();
         player.setCenterX(hauteurCase/2);
@@ -111,7 +116,6 @@ public class Grid extends Group {
     };
 
     EventHandler<MouseEvent> handlerEND = new EventHandler<MouseEvent>() {
-
         @Override
         public void handle(MouseEvent event) {
             //System.out.println("Finis");
@@ -233,7 +237,10 @@ public class Grid extends Group {
 
             }
         }
-        handlerSelection();
+        if(this.manager){
+            handlerSelection();
+        }
+
     }
 
     protected void rmHandlerSelection(){
@@ -274,5 +281,7 @@ public class Grid extends Group {
    public void setColorCircle(Color c){
        player.setFill(c);
    }
+
+
 
 }

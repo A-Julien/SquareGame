@@ -1,13 +1,14 @@
 package Client;
 import Configuration.RmqConfig;
-import Server.RPC_COMMUNICATION;
 import Server.TaskServer;
+import Server.RPC_COMMUNICATION;
 import com.rabbitmq.client.*;
 import Utils.Communication;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 public class SimulationClient implements RmqConfig {
+
 
     private static final String TASK_QUEUE_NAME = "task_queue";
     private static String queueCom;
@@ -35,19 +36,9 @@ public class SimulationClient implements RmqConfig {
 
         channel.basicPublish("", queueCom, null, Communication.serialize(task));
 
-        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            try {
-                TaskClient t = (TaskClient) Communication.deserialize(delivery.getBody());
-                System.out.println(" [x] New Task there'" + t.toString() + "'");
-                System.out.println(t.handle(channel, myQueue));
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-                System.out.println("Problem during task");
-            }
-                recevoirInformation.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-
-        };
-        recevoirInformation.basicConsume(myQueue, false, deliverCallback, consumerTag -> { });
+        Thread.sleep(5000);
+        System.out.println("Deuxieme envoi");
+        channel.basicPublish("", queueCom, null, Communication.serialize(task));
 
         //message = "Au revoir!";
         //channel.basicPublish("", queueCom, null, message.getBytes(StandardCharsets.UTF_8));
