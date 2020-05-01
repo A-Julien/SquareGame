@@ -1,7 +1,8 @@
 package Server;
 import FX.Console;
 import Class.InformationsServeur;
-
+import Class.Task;
+import Utils.Communication;
 import com.rabbitmq.client.*;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -51,7 +52,7 @@ public class Server extends Console implements Runnable  {
     @Override
     public void run() {
         try {
-            this.addLogs("Server status : " + this.SERVER_NAME + " up");
+            System.out.println("Server status : " + this.SERVER_NAME + " up");
             this.initConnection();
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
@@ -61,19 +62,23 @@ public class Server extends Console implements Runnable  {
     private void initQueuCommunication() throws IOException{
         work = connection.createChannel();
         uniqueServeurQueue = work.queueDeclare().getQueue();
-        this.addLogs("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
+        System.out.println("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            String message = new String(delivery.getBody(), "UTF-8");
 
-            console.addLogs(" [x] Client talk to me '" + message + "'");
             try {
-                Thread.sleep(1000);
-                //doWork(message);
-            } catch (InterruptedException e) {
+                TaskServer t = (TaskServer) Communication.deserialize(delivery.getBody());
+                System.out.println(" [x] New Task there'" + t.toString() + "'");
+                System.out.println(t.handle(work,broadcast));
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-            } finally {
-                work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                System.out.println("Problem during task");
             }
+            work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+
+
+
+
+
         };
         work.basicConsume(uniqueServeurQueue, false, deliverCallback, consumerTag -> { });
 
@@ -96,7 +101,7 @@ public class Server extends Console implements Runnable  {
             String response = "";
 
 
-            this.addLogs("New client there");
+            System.out.println("New client there");
             information.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, uniqueServeurQueue.getBytes("UTF-8"));
             information.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             // RabbitMq consumer worker thread notifies the RPC server owner thread
@@ -117,7 +122,6 @@ public class Server extends Console implements Runnable  {
         try{
             this.connection = factory.newConnection();
         } catch ( Exception e ) {
-            this.addLogs("Connection Failed");
             System.out.println("Connection Failed");
             java.lang.System.exit(-1);
 
@@ -142,7 +146,7 @@ public class Server extends Console implements Runnable  {
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), "UTF-8");
-            this.addLogs(" [x] Received '" + message + "'");
+            System.out.println(" [x] Received '" + message + "'");
             synchronized (monitor) {
                 monitor.notify();
             }
@@ -153,9 +157,9 @@ public class Server extends Console implements Runnable  {
 
     private void initConnectionRPC() throws IOException, TimeoutException {
             try (RPC_INIT rpcInit = new RPC_INIT(this.connection, this.RPC_INI_QUEUE_NAME, this.uniqueServeurQueue)) {
-                this.addLogs(" [x] Requesting Initialisation from manager");
+                System.out.println(" [x] Requesting Initialisation from manager");
                 this.informationsServeur = rpcInit.call();
-                this.addLogs(" [.] Got IT");
+                System.out.println(" [.] Got IT");
             } catch (IOException | TimeoutException | InterruptedException e) {
                 e.printStackTrace();
             }

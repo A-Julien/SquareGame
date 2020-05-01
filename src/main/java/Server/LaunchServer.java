@@ -14,7 +14,7 @@ public class LaunchServer extends Application implements RmqConfig {
         Server server = new Server(RPC_QUEUE_NAME, RMQ_SERVER_IP , "NoCare");
         primaryStage.setTitle("Serveur");
         primaryStage.setScene(server);
-        primaryStage.show();
+       // primaryStage.show();
         server.run();
 
 
