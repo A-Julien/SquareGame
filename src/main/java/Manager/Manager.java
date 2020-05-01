@@ -114,7 +114,7 @@ public class Manager {
     }
 
     /**
-     * Create Server threadsd
+     * Create Server threads
      *
      * @throws IOException
      * @throws TimeoutException
