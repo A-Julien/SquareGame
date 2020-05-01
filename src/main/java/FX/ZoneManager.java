@@ -219,7 +219,6 @@ public class ZoneManager extends BorderPane {
                     }
                     index++;
                 }
-
                 if(!find){
                     z = new Zone(grid.cases[i][j].getZ());
                     z.addCell(new PositionGrille(i, j));
@@ -238,12 +237,11 @@ public class ZoneManager extends BorderPane {
         for(Zone zone : finalZone){
             System.out.println(zone.toString());
         }
-
+        refreshTable();
         try {
             this.manager.run();
         } catch (ServerNotSetException | TimeoutException | MapNotSetException | IOException e) {
             System.out.println("Manager error while starting : " + e.toString());
         }
-        refreshTable();
     }
 }
