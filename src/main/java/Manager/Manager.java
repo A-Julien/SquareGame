@@ -103,11 +103,11 @@ public class Manager {
             }
 
             Channel channelBroadcastServer = connection.createChannel();
-            channelBroadcastServer.exchangeDeclare("BROADCAST", "fanout");
+            channelBroadcastServer.exchangeDeclare("INITMAP", "fanout");
 
             System.out.println("[MANAGER] All server connected, sending map");
 
-            channelBroadcastServer.basicPublish("BROADCAST", "", null, Communication.serialize(this.zoneList));
+            channelBroadcastServer.basicPublish("INITMAP", "", null, Communication.serialize(this.zoneList));
 
             this.executor.shutdown();
         }

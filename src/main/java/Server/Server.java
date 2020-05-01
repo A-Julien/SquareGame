@@ -23,6 +23,7 @@ public class Server extends Console implements Runnable  {
     private Connection connection;
     private Channel information;
     private Channel broadcast;
+    private Channel initMap;
 //    private Channel newClient;
     private Channel work;
     private List<Zone> map;
@@ -132,6 +133,7 @@ public class Server extends Console implements Runnable  {
         }
         this.initQueuCommunication();
         this.initCommunicationClient();
+        this.initConnectionInitMap();
         this.initConnectionFANOUT();
         this.initConnectionRPC();
         this.waitForAllServersReady();
@@ -144,6 +146,32 @@ public class Server extends Console implements Runnable  {
         this.broadcast.exchangeDeclare("BROADCAST", "fanout");
         String queueName = broadcast.queueDeclare().getQueue();
         this.broadcast.queueBind(queueName, "BROADCAST", "");
+
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+
+
+            try {
+                TaskServer t = (TaskServer) Communication.deserialize(delivery.getBody());
+                System.out.println(" [x] New Task there'" + t.toString() + "'");
+                System.out.println(t.handle(work,broadcast));
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                System.out.println("Problem during task");
+            }
+            work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+
+        };
+
+
+        this.broadcast.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
+    }
+
+    private void initConnectionInitMap() throws IOException, TimeoutException {
+
+        this.initMap = connection.createChannel();
+        this.initMap.exchangeDeclare("INITMAP", "fanout");
+        String queueName = initMap.queueDeclare().getQueue();
+        this.initMap.queueBind(queueName, "INITMAP", "");
 
         monitor = new Object();
 
@@ -159,7 +187,7 @@ public class Server extends Console implements Runnable  {
             }
             this.initOk = true;
         };
-        this.broadcast.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
+        this.initMap.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
     }
 
     private void initConnectionRPC(){

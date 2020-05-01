@@ -35,12 +35,11 @@ public class TaskServer extends Task implements ServerReaction{
     @Override
     public String playerWantedToMove(Channel channel, Channel fannout) throws IOException {
         if (dansMazone()) {
-            String responsse = "Tu peux bouger";
-            String toBroadcast = "A client there just moove";
             // MOVE IN THE GRID
             TaskClient reply2c = new TaskClient("PRINT TU PEUX BOUGER","null");
+            TaskServer pingMooveSerer = new TaskServer("NEW_NEIGHBOR NEAR YOU ?", replyQueue);
             channel.basicPublish("", replyQueue, null, Communication.serialize(reply2c));
-            fannout.basicPublish("BROADCAST", "", null, toBroadcast.getBytes("UTF-8"));
+            fannout.basicPublish("BROADCAST", "", null, Communication.serialize(pingMooveSerer));
             //
             return "Task Handled Correctly";
         } else {
