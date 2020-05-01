@@ -103,8 +103,6 @@ public class Manager {
                 }
             }
 
-            channel.close();
-
             Channel channel2 = connection.createChannel();
             channel2.exchangeDeclare("BROADCAST", "fanout");
 
