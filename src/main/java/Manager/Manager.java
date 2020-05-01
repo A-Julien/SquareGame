@@ -37,7 +37,6 @@ public class Manager {
 
     /**
      * Allow manager to run
-     * @throws Exception
      * @throws MapNotSetException just security, can not start if map not set
      * @throws ServerNotSetException just security, can not start if Server not set
      */
@@ -57,7 +56,7 @@ public class Manager {
 
             channel.basicQos(1);
 
-            System.out.println(" [x] Manager connected to RmqServer");
+            System.out.println("[MANAGER] Manager connected to RmqServer");
 
             Object monitor = new Object();
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
@@ -70,9 +69,9 @@ public class Manager {
 
                 try {
                     String message = new String(delivery.getBody(), "UTF-8");
-                    System.out.println("[..] New Server found  " + message);
+                    System.out.println("[MANAGER] New Server found  " + message);
                 } catch (RuntimeException e) {
-                    System.out.println(" [.] " + e.toString());
+                    System.out.println("[MANAGER] " + e.toString());
                 } finally {
                     channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.getBytes("UTF-8"));
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
@@ -83,7 +82,7 @@ public class Manager {
 
                 }
             };
-            System.out.println(" [x] Awaiting RPC requests from Server");
+            System.out.println("[MANAGER] Awaiting RPC requests from Server");
             channel.basicConsume(RmqConfig.RPC_QUEUE_NAME, false, deliverCallback, (consumerTag -> { }));
 
             this.createServer();
@@ -103,25 +102,25 @@ public class Manager {
                 }
             }
 
-            Channel channel2 = connection.createChannel();
-            channel2.exchangeDeclare("BROADCAST", "fanout");
+            Channel channelBroadcastServer = connection.createChannel();
+            channelBroadcastServer.exchangeDeclare("BROADCAST", "fanout");
 
-            System.out.println("[x]All server connected, sending map");
+            System.out.println("[MANAGER] All server connected, sending map");
 
-            channel2.basicPublish("BROADCAST", "", null, Communication.serialize(this.zoneList));
+            channelBroadcastServer.basicPublish("BROADCAST", "", null, Communication.serialize(this.zoneList));
 
             this.executor.shutdown();
         }
     }
 
     /**
-     * Create Server threads
+     * Create Server threadsd
      *
      * @throws IOException
      * @throws TimeoutException
      */
     private void createServer() throws IOException, TimeoutException {
-        System.out.println("[x] Launching local server");
+        System.out.println("[MANAGER] Launching local server");
         this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(this.nbThreads);
         for (int i = 1; i <= this.metaDataServer.getNbLocalSever(); i++){
             this.executor.execute(
