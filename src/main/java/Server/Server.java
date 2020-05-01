@@ -1,8 +1,12 @@
 package Server;
+import FX.Console;
 import Class.InformationsServeur;
-
+import Class.Task;
 import Utils.Communication;
 import com.rabbitmq.client.*;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import org.apache.cassandra.locator.Ec2Snitch;
 
 import java.io.IOException;
 import Class.Zone;
@@ -11,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-public class Server implements Runnable {
+
+public class Server extends Console implements Runnable  {
     private String SERVER_NAME;
     private String RPC_INI_QUEUE_NAME;
     private ConnectionFactory factory;
@@ -34,13 +39,14 @@ public class Server implements Runnable {
     final String TASK_QUEUE_NAME = "task_queue";
     private final String POOL_CLIENT_QUEUE = "new_client";
     private  String RMQ_HOST;
-
+    private Console console;
 
     boolean initOk = false;
 
 
 
     public Server(String RPC_INI_QUEUE_NAME, String RMQ_HOST, String SERVER_NAME) throws IOException, TimeoutException {
+        super();
         this.SERVER_NAME = SERVER_NAME;
         this.RPC_INI_QUEUE_NAME = RPC_INI_QUEUE_NAME;
         this.RMQ_HOST = RMQ_HOST;
@@ -62,17 +68,22 @@ public class Server implements Runnable {
         uniqueServeurQueue = work.queueDeclare().getQueue();
         this.log("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            String message = new String(delivery.getBody(), "UTF-8");
 
             System.out.println("[x] Client talk to me '" + message + "'");
             try {
-                Thread.sleep(1000);
-                //doWork(message);
-            } catch (InterruptedException e) {
+                TaskServer t = (TaskServer) Communication.deserialize(delivery.getBody());
+                System.out.println(" [x] New Task there'" + t.toString() + "'");
+                System.out.println(t.handle(work,broadcast));
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-            } finally {
-                work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                System.out.println("Problem during task");
             }
+            work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+
+
+
+
+
         };
         work.basicConsume(uniqueServeurQueue, false, deliverCallback, consumerTag -> { });
 
@@ -112,7 +123,13 @@ public class Server implements Runnable {
     private void initConnection() throws IOException, TimeoutException {
         this.factory = new ConnectionFactory();
         this.factory.setHost(this.RMQ_HOST);
-        this.connection = factory.newConnection();
+        try{
+            this.connection = factory.newConnection();
+        } catch ( Exception e ) {
+            System.out.println("Connection Failed");
+            java.lang.System.exit(-1);
+
+        }
         this.initQueuCommunication();
         this.initCommunicationClient();
         this.initConnectionFANOUT();
@@ -172,4 +189,5 @@ public class Server implements Runnable {
     private void log(String message){
         System.out.println("[" + this.SERVER_NAME + "] " + message);
     }
+
 }
