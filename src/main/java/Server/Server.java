@@ -1,12 +1,16 @@
 package Server;
+import FX.Console;
 import Class.InformationsServeur;
 
 import com.rabbitmq.client.*;
+import javafx.application.Application;
+import javafx.stage.Stage;
+import org.apache.cassandra.locator.Ec2Snitch;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-public class Server implements Runnable{
+public class Server extends Console implements Runnable  {
     private String SERVER_NAME;
     private String RPC_INI_QUEUE_NAME;
     private ConnectionFactory factory;
@@ -28,23 +32,26 @@ public class Server implements Runnable{
     final String TASK_QUEUE_NAME = "task_queue";
     private final String POOL_CLIENT_QUEUE = "new_client";
     private  String RMQ_HOST;
-
+    private Console console;
 
     boolean initOk = false;
 
 
 
     public Server(String RPC_INI_QUEUE_NAME, String RMQ_HOST, String SERVER_NAME) throws IOException, TimeoutException {
+        super();
         this.SERVER_NAME = SERVER_NAME;
         this.RPC_INI_QUEUE_NAME = RPC_INI_QUEUE_NAME;
         this.RMQ_HOST = RMQ_HOST;
-       // connection.close();
+
+
+
     }
 
     @Override
     public void run() {
         try {
-            System.out.println("Server status : " + this.SERVER_NAME + " up");
+            this.addLogs("Server status : " + this.SERVER_NAME + " up");
             this.initConnection();
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
@@ -54,11 +61,11 @@ public class Server implements Runnable{
     private void initQueuCommunication() throws IOException{
         work = connection.createChannel();
         uniqueServeurQueue = work.queueDeclare().getQueue();
-        System.out.println("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
+        this.addLogs("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), "UTF-8");
 
-            System.out.println(" [x] Client talk to me '" + message + "'");
+            console.addLogs(" [x] Client talk to me '" + message + "'");
             try {
                 Thread.sleep(1000);
                 //doWork(message);
@@ -89,7 +96,7 @@ public class Server implements Runnable{
             String response = "";
 
 
-            System.out.println("New client there");
+            this.addLogs("New client there");
             information.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, uniqueServeurQueue.getBytes("UTF-8"));
             information.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             // RabbitMq consumer worker thread notifies the RPC server owner thread
@@ -106,7 +113,16 @@ public class Server implements Runnable{
     private void initConnection() throws IOException, TimeoutException {
         this.factory = new ConnectionFactory();
         this.factory.setHost(this.RMQ_HOST);
-        this.connection = factory.newConnection();
+
+        try{
+            this.connection = factory.newConnection();
+        } catch ( Exception e ) {
+            this.addLogs("Connection Failed");
+            System.out.println("Connection Failed");
+            java.lang.System.exit(-1);
+
+        }
+
         this.initQueuCommunication();
         this.initCommunicationClient();
         this.initConnectionFANOUT();
@@ -126,7 +142,7 @@ public class Server implements Runnable{
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String message = new String(delivery.getBody(), "UTF-8");
-            System.out.println(" [x] Received '" + message + "'");
+            this.addLogs(" [x] Received '" + message + "'");
             synchronized (monitor) {
                 monitor.notify();
             }
@@ -137,9 +153,9 @@ public class Server implements Runnable{
 
     private void initConnectionRPC() throws IOException, TimeoutException {
             try (RPC_INIT rpcInit = new RPC_INIT(this.connection, this.RPC_INI_QUEUE_NAME, this.uniqueServeurQueue)) {
-                System.out.println(" [x] Requesting Initialisation from manager");
+                this.addLogs(" [x] Requesting Initialisation from manager");
                 this.informationsServeur = rpcInit.call();
-                System.out.println(" [.] Got IT");
+                this.addLogs(" [.] Got IT");
             } catch (IOException | TimeoutException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -157,7 +173,6 @@ public class Server implements Runnable{
             }
         }
     }
-
 
 
 }
