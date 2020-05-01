@@ -1,4 +1,4 @@
-#  DevOps
+#  SquareGame
 
 
 [![Build Status](https://travis-ci.com/A-Julien/SquareGame.svg?branch=master)](https://travis-ci.com/A-Julien/SquareGame) 
@@ -10,9 +10,8 @@
 *	Github : https://github.com/A-Julien/SquareGame
 *	CI (Travis) : https://travis-ci.com/A-Julien/SquareGame
 *	MavenDoc : [mavendoc](https://a-julien.github.io/SquareGame)
-*   JavaDoc : [javadoc](https://a-julien.github.io/SquareGame/apidocs/index.html)
 
 ## Documentation
 
-La documentation des fonctions est disponnible dans la [javadoc](https://a-julien.github.io/devops/apidocs/index.html)
+La documentation des fonctions est disponnible dans la [javadoc](https://a-julien.github.io/SquareGame/apidocs/index.html)
 

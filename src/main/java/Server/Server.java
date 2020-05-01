@@ -6,7 +6,7 @@ import com.rabbitmq.client.*;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-public class Server implements Runnable{
+public class Server implements Runnable {
     private String SERVER_NAME;
     private String RPC_INI_QUEUE_NAME;
     private ConnectionFactory factory;

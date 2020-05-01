@@ -192,6 +192,8 @@ public class ZoneManager extends BorderPane {
     /**
      * Button start trigger
      * build the map and launch manager
+     *
+     * Quick and very Dirty sorry
      */
     void eventLaunch(){
         System.out.print("Build map");
@@ -204,16 +206,21 @@ public class ZoneManager extends BorderPane {
 
         ArrayList<Zone> finalZone = new ArrayList();
         Zone z = null;
+        boolean find = false;
         for(int i = 0; i < grid.getX(); i++){
             for(int j = 0; j < grid.getY(); j++){
                 int index = -1;
+                find = false;
                 for (Zone zone: finalZone) {
                     if (grid.cases[i][j].getZ().nomZone.equals(zone.nomZone)) {
-                        index = 1;
+                        find  = true;
+                        index++;
                         break;
                     }
+                    index++;
                 }
-                if( index == -1){
+
+                if(!find){
                     z = new Zone(grid.cases[i][j].getZ());
                     z.addCell(new PositionGrille(i, j));
                     finalZone.add(z);
