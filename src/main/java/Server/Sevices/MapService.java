@@ -50,9 +50,7 @@ public class MapService {
      * @return true if in the server zone
      */
     public boolean isInMyZone(Cell pos) {
-        for (Zone zone : this.map) if (zone.find(pos) != null) return true;
-
-        return false;
+        return this.map.get(this.indexZone).find(pos) != null;
     }
 
     /**
@@ -66,7 +64,7 @@ public class MapService {
         for (Zone zone : this.map) {
             if (zone.find(pos) != null) return zone.getServerQueueName();
         }
-        throw new ZoneNotFound("Can't find zone with pos : " + pos.toString());
+        throw new ZoneNotFound("Can't find server who manage " +  pos.toString() + " cell");
     }
 
 
@@ -82,12 +80,12 @@ public class MapService {
         for (Cell cell : this.map.get(this.indexZone).getCells()) if (cell.equals(pos)) return cell.isOccupation();
 
         throw new PositionNotFound(
-                "can't find position " +
+                "Can't find cell position " +
                 pos.toString() +
-                "[zone: " +
+                " in (zone: " +
                 this.map.get(this.indexZone).getNomZone() +
-                ",id: "+
-                this.map.get(this.indexZone).getId());
+                " of id: "+
+                this.map.get(this.indexZone).getId() + ")");
     }
 
 
@@ -102,10 +100,10 @@ public class MapService {
         for (Cell pos : this.map.get(this.indexZone).getCells()) if(pos.getClientQueue().equals(clientQueue)) return pos;
 
         throw new ClientNotFound(
-                "client not found in [zone: " +
+                "client not found in (zone: " +
                 this.map.get(this.indexZone).getNomZone() +
-                ",id: "+
-                this.map.get(this.indexZone).getId());
+                " of id: "+
+                this.map.get(this.indexZone).getId() + ")");
     }
 
 
@@ -125,8 +123,8 @@ public class MapService {
                 if (cell.isOccupation()) throw new ClientActionError(
                         "Cannot perform moving " +
                         clientQueue +
-                        "to " + newPos.toString() +
-                        "client " + cell.getClientQueue() + " already here");
+                        " to " + newPos.toString() +
+                        " client " + cell.getClientQueue() + " already here");
                 (this.getPosClient(clientQueue)).clientLeave();
                 cell.setClient(clientQueue);
                 return;
