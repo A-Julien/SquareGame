@@ -10,6 +10,7 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -31,6 +32,8 @@ public class Client extends Scene implements RmqConfig {
     BorderPane borderPane;
     Grid grid;
     Channel envoyerInformation;
+    private Alert alert1;
+    private Alert alert2;
 
     Cell pos;
     int i;
@@ -54,6 +57,16 @@ public class Client extends Scene implements RmqConfig {
 
         borderPane.setCenter(grid);
         synchro = false;
+
+        this.alert1 = new Alert(Alert.AlertType.INFORMATION);
+        this.alert1.setTitle("Regardez aux alentours !");
+        this.alert1.setHeaderText("On dirais que...");
+        this.alert1.setContentText("BONJOUR !");
+
+        this.alert2 = new Alert(Alert.AlertType.INFORMATION);
+        this.alert2.setTitle("Au mais..");
+        this.alert2.setHeaderText("Les gens ne répondent même plus aux bonjours !");
+        this.alert2.setContentText("*Regard de haine* Bonjour à vous aussi...");
 
 
         EventHandler<KeyEvent> clavier = new EventHandler<KeyEvent>() {
@@ -110,10 +123,10 @@ public class Client extends Scene implements RmqConfig {
             try {
                 Task task = (Task) Communication.deserialize(delivery.getBody());
                 System.out.println(" [x] New Task there'" + task.toString() + "'");
-         /*       synchronized (monitor){
+                  synchronized (monitor){
                     monitor.notify();
                 }
-         */       switch (task.cmdType){
+                  switch (task.cmdType){
                     case INIT:
                             queuServer = task.replyQueu;
                             this.pos = (Cell) task.cmd;
@@ -125,9 +138,16 @@ public class Client extends Scene implements RmqConfig {
                         mouvement((Cell) task.cmd);
                     break;
                     case PING:
-                        //Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        //alert.setContentText("Bonjour !");
-                        //alert.showAndWait();
+                        System.out.println("BONJOUR WESH");
+
+                        Platform.runLater(alert1::show);
+                        Task t = new Task(TaskCommand.PONG, null, null);
+                        envoyerInformation.basicPublish("", task.replyQueu, null, Communication.serialize(t));
+
+                        break;
+                    case PONG:
+                            System.out.println("BONJOUR MA GUEULE");
+                            Platform.runLater(alert2::show);
                         break;
                     case GET_COLOR:
 
@@ -147,7 +167,6 @@ public class Client extends Scene implements RmqConfig {
                         mouvement((Cell) task.cmd);
                         // CHANGER COULEUR ? :)
                         this.requestServerColor();
-
                         break;
                     default:
 

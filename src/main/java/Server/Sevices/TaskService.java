@@ -154,7 +154,6 @@ public class TaskService implements TaskServiceReaction {
                 this.outChannel.basicPublish("",task.replyQueu, null, Communication.serialize(taskToSend));
             }
 
-
         } catch ( ClientNotFound err){
             System.out.println("Error : " + err.toString());
             taskToSend = new Task(TaskCommand.CLIENT_NOT_FOUNDED, null , null);
@@ -189,21 +188,11 @@ public class TaskService implements TaskServiceReaction {
                 this.outChannel.basicPublish("",client, null,  Communication.serialize(taskToSendToCLient));
 
                 checkForNeighbor( target, client);
-
-
-
             }
-
-
-
-
-
         } catch (PositionNotFound positionNotFound) {
             positionNotFound.printStackTrace();
             Task taskToSendToCLient = new Task(TaskCommand.MOVE_NOT_GRANTED, null , null);
             this.outChannel.basicPublish("",client, null,  Communication.serialize(taskToSendToCLient));
-
-
         }
 
     }
@@ -248,7 +237,7 @@ public class TaskService implements TaskServiceReaction {
         }
 
         try {
-            voisine = new Cell(c.getX()+1, c.getY()-1);
+            voisine = new Cell(c.getX(), c.getY()-1);
             contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, voisine , queueClient);
             if(mapService.whoManageCell(voisine) != null)
                 this.outChannel.basicPublish("",mapService.whoManageCell(voisine), null,  Communication.serialize(contactServerNeighbor));
@@ -265,7 +254,7 @@ public class TaskService implements TaskServiceReaction {
         String client = mapService.isSomeOneWhere((Cell)task.cmd);
         if(client != null){
             Task t = new Task(TaskCommand.PING, null , task.replyQueu);
-            this.outChannel.basicPublish("",client, null,  Communication.serialize(t));
+            this.outChannel.basicPublish("", client, null,  Communication.serialize(t));
         }
     }
 
