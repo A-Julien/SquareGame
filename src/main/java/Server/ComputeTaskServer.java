@@ -1,12 +1,11 @@
 package Server;
-import FX.Map.PositionGrille;
+import Manager.Map.Cell;
 import Manager.Map.Zone;
 import Task.Task;
 import Task.TaskCommand;
 
 import Utils.Communication;
 import com.rabbitmq.client.Channel;
-import javafx.geometry.Pos;
 
 import java.io.IOException;
 import java.util.List;
@@ -51,11 +50,11 @@ public class ComputeTaskServer implements ServerReaction{
         Task TaskToSend;
         String[] cmd = ((String)task.cmd).trim().split("\\s+");
         //MapComputer.getCoord(Replyqueue);
-        PositionGrille posActuel = new PositionGrille(0,0);
-        PositionGrille cible = new PositionGrille(posActuel.getX() + Integer.parseInt(cmd[0]),
+        Cell posActuel = new Cell(0,0);
+        Cell cible = new Cell(posActuel.getX() + Integer.parseInt(cmd[0]),
                 posActuel.getY() + Integer.parseInt(cmd[1]) );
         if (isInZone()) {
-            // if(MapManager.isFree(PositionGrille p)){
+            // if(MapManager.isFree(Cell p)){
              if(true){
                  // Swap Joeur Case X,Y
                  TaskToSend = new Task(TaskCommand.MOVE_GRANTED, new String(cible.getX() + " " + cible.getY()), null );
@@ -80,7 +79,7 @@ public class ComputeTaskServer implements ServerReaction{
     }
 
     /*@Override
-    public void checkForNeighbors(PositionGrille p) {
+    public void checkForNeighbors(Cell p) {
     }*/
 
    /* @Override

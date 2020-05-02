@@ -15,7 +15,6 @@ public class ZoneFx extends Zone {
         super(nom, color);
         this.colorPicker = new ColorPicker();
         colorPicker.setValue(color);
-        positionGrille = new ArrayList<>();
     }
 
     public ColorPicker getColorPicker() {

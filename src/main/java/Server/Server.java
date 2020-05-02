@@ -34,7 +34,7 @@ public class Server extends Console implements Runnable, RmqConfig {
     private String uniqueServeurQueue;
 
 
-    private String serverZone;
+    private Integer serverZone;
     private Object monitor;
 
     private Object soloClient;
@@ -106,7 +106,7 @@ public class Server extends Console implements Runnable, RmqConfig {
             this.log("Getting data from manager");
             this.serverZone = rpcInit.call();
             this.log("Connection fully establish");
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -137,8 +137,6 @@ public class Server extends Console implements Runnable, RmqConfig {
           //  work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         };
         this.incomingInstruction.basicConsume(this.uniqueServeurQueue, true, deliverCallback, consumerTag -> { });
-
-
     }
 
     /**
@@ -255,7 +253,6 @@ public class Server extends Console implements Runnable, RmqConfig {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
             }
         }
     }

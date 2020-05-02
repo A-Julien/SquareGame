@@ -74,7 +74,7 @@ public class Manager {
                 } catch (RuntimeException e) {
                     System.out.println("[MANAGER] " + e.toString());
                 } finally {
-                    channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, this.giveZone().getBytes());
+                    channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, Communication.serialize(this.giveZone()));
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                     // RabbitMq consumer worker thread notifies the RPC server owner thread
                     synchronized (monitor) {
@@ -118,9 +118,9 @@ public class Manager {
         this.zoneList.get(this.zoneCounter).setServerQueueName(serverQueueName);
     }
 
-    private String giveZone(){
+    private Integer giveZone(){
         this.zoneCounter++;
-        return this.zoneList.get(this.zoneCounter - 1).getNomZone();
+        return this.zoneList.get(this.zoneCounter - 1).getId();
     }
 
     /**

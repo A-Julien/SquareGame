@@ -2,7 +2,7 @@ package FX.Manager;
 
 import FX.Case;
 import FX.Grid;
-import FX.Map.PositionGrille;
+import Manager.Map.Cell;
 import Manager.Map.ZoneFx;
 import Manager.Manager;
 import Manager.Map.Zone;
@@ -214,7 +214,7 @@ public class ZoneManager extends BorderPane {
                 int index = -1;
                 find = false;
                 for (Zone zone: finalZone) {
-                    if (grid.cases[i][j].getZ().nomZone.equals(zone.nomZone)) {
+                    if (grid.cases[i][j].getZ().getNomZone().equals(zone.getNomZone())) {
                         find  = true;
                         index++;
                         break;
@@ -223,10 +223,10 @@ public class ZoneManager extends BorderPane {
                 }
                 if(!find){
                     z = new Zone(grid.cases[i][j].getZ());
-                    z.addCell(new PositionGrille(i, j));
+                    z.addCell(new Cell(i, j));
                     finalZone.add(z);
                 } else {
-                    finalZone.get(index).addCell(new PositionGrille(i, j));
+                    finalZone.get(index).addCell(new Cell(i, j));
                 }
             }
             System.out.print(".");

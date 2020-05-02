@@ -22,7 +22,7 @@ public class Task implements Serializable {
     /*public String device;
     public int type; // 1 = MOVE; 2 = you Have A neihbgor ; 3 = Give Instruction to a client
     public String replyQueue;
-    public PositionGrille pos;
+    public Cell pos;
     public String cmd;
     public String [] mots;
 
@@ -37,7 +37,7 @@ public class Task implements Serializable {
             case "MOVE":
 
                 type =1;
-                pos = new PositionGrille(Integer.parseInt(mots[1]), Integer.parseInt(mots[2]));
+                pos = new Cell(Integer.parseInt(mots[1]), Integer.parseInt(mots[2]));
                 break;
             case "NEW_NEIGHBOR":
                 type = 2;

@@ -1,6 +1,6 @@
 package FX;
 
-import FX.Map.PositionGrille;
+import Manager.Map.Cell;
 import Configuration.RmqConfig;
 
 import Task.Task;
@@ -27,7 +27,7 @@ public class Client extends Scene implements RmqConfig {
     Grid grid;
     Channel envoyerInformation;
 
-    PositionGrille pos;
+    Cell pos;
     int i;
 
     private static final String TASK_QUEUE_NAME = "task_queue";
@@ -40,7 +40,7 @@ public class Client extends Scene implements RmqConfig {
 
         grid = new Grid(10,10,hauteur*0.9,largeur*0.9, false);
 
-        this.pos = new PositionGrille(0,0);
+        this.pos = new Cell(0,0);
         grid.affCircle();
         borderPane.setCenter(grid);
 
@@ -49,7 +49,7 @@ public class Client extends Scene implements RmqConfig {
         EventHandler<KeyEvent> clavier = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent key) {
-                PositionGrille p = new PositionGrille(0,0);
+                Cell p = new Cell(0,0);
                 boolean dep = false;
                 if(key.getCode()== KeyCode.Q || key.getCode()== KeyCode.LEFT) {
                     System.out.println("Déplacement gauche");
@@ -101,7 +101,7 @@ public class Client extends Scene implements RmqConfig {
                 switch (task.cmdType){
                     case MOVE_GRANTED:
                         String[] cmd = ((String)task.cmd).trim().split("\\s+");
-                        mouvement(new PositionGrille(Integer.parseInt(cmd[0]), Integer.parseInt(cmd[1])));
+                        mouvement(new Cell(Integer.parseInt(cmd[0]), Integer.parseInt(cmd[1])));
                     break;
                     default:
 
@@ -121,13 +121,13 @@ public class Client extends Scene implements RmqConfig {
 
     }
 
-    public void handleMouvement(PositionGrille mouvement) throws IOException {
+    public void handleMouvement(Cell mouvement) throws IOException {
         System.out.println("Déplacement souhaité : " + mouvement);
        // AskServer mouvement
         //TaskServer task = new TaskServer("MOVE " + mouvement.getX() +" " +mouvement.getY(), myQueue);
         //envoyerInformation.basicPublish("", queueCom, null, Communication.serialize(task));
 
-        PositionGrille newP = new PositionGrille(pos.getX() + mouvement.getX(), pos.getY() + mouvement.getY());
+        Cell newP = new Cell(pos.getX() + mouvement.getX(), pos.getY() + mouvement.getY());
 
         System.out.println(newP);
 
@@ -140,7 +140,7 @@ public class Client extends Scene implements RmqConfig {
         //setColorGrid(Color.BLUE);
     }
 
-    public void mouvement(PositionGrille p){
+    public void mouvement(Cell p){
         pos = p;
         grid.setPosCircle(pos.getX(), pos.getY());
     }

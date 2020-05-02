@@ -1,6 +1,5 @@
 package Manager.Map;
 
-import FX.Map.PositionGrille;
 import javafx.scene.paint.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,7 +11,7 @@ public class Zone implements Serializable {
     private String serverQueueName;
     private String ip = "auto";
     private String port = "auto";
-    private ArrayList<PositionGrille> positionGrille;
+    private ArrayList<Cell> cell;
 
 
     public String getServerQueueName() {
@@ -23,32 +22,32 @@ public class Zone implements Serializable {
         this.serverQueueName = serverQueueName;
     }
 
-    public ArrayList<PositionGrille> getPositionGrille() {
-        return positionGrille;
+    public ArrayList<Cell> getCells() {
+        return cell;
     }
 
-    public void setPositionGrille(ArrayList<PositionGrille> positionGrille) {
-        this.positionGrille = positionGrille;
+    public void setCell(ArrayList<Cell> cell) {
+        this.cell = cell;
     }
 
     public Zone(String nom, Color c){
         this.nomZone = nom;
         this.id = compteur_id;
         compteur_id++;
-        positionGrille = new ArrayList<>();
+        cell = new ArrayList<>();
     }
 
     public Zone(ZoneFx zone){
         this.nomZone = zone.getNomZone();
         this.id = compteur_id;
         compteur_id++;
-        this.positionGrille = zone.getPositionGrille();
+        this.cell = zone.getCells();
         this.ip = zone.getIp();
         this.port = zone.getPort();
     }
 
-    public void addCell(PositionGrille c){
-        positionGrille.add(c);
+    public void addCell(Cell c){
+        cell.add(c);
     }
 
     public String getNomZone() {
@@ -89,5 +88,10 @@ public class Zone implements Serializable {
         this.port = port;
     }
 
-
+    public Cell find(Cell cell){
+        for (Cell pos : this.cell){
+            if (pos.equals(cell)) return pos;
+        }
+        return null;
+    }
 }
