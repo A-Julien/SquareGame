@@ -8,13 +8,28 @@ import java.util.ArrayList;
 public class Zone implements Serializable {
     private static int compteur_id = 0;
     int id;
-    public String nomZone;
-    String ip = "auto";
-    String port = "auto";
-    ArrayList<PositionGrille> positionGrille;
+    private String nomZone;
+    private String serverQueueName;
+    private String ip = "auto";
+    private String port = "auto";
+    private ArrayList<PositionGrille> positionGrille;
 
 
+    public String getServerQueueName() {
+        return serverQueueName;
+    }
 
+    public void setServerQueueName(String serverQueueName) {
+        this.serverQueueName = serverQueueName;
+    }
+
+    public ArrayList<PositionGrille> getPositionGrille() {
+        return positionGrille;
+    }
+
+    public void setPositionGrille(ArrayList<PositionGrille> positionGrille) {
+        this.positionGrille = positionGrille;
+    }
 
     public Zone(String nom, Color c){
         this.nomZone = nom;
@@ -24,12 +39,12 @@ public class Zone implements Serializable {
     }
 
     public Zone(ZoneFx zone){
-        this.nomZone = zone.nomZone;
+        this.nomZone = zone.getNomZone();
         this.id = compteur_id;
         compteur_id++;
-        this.positionGrille = zone.positionGrille;
-        this.ip = zone.ip;
-        this.port = zone.port;
+        this.positionGrille = zone.getPositionGrille();
+        this.ip = zone.getIp();
+        this.port = zone.getPort();
     }
 
     public void addCell(PositionGrille c){

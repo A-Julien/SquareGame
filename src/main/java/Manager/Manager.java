@@ -70,6 +70,7 @@ public class Manager {
                 try {
                     String message = new String(delivery.getBody(), "UTF-8");
                     System.out.println("[MANAGER] New Server found  " + message);
+                    this.setServerZone(message);
                 } catch (RuntimeException e) {
                     System.out.println("[MANAGER] " + e.toString());
                 } finally {
@@ -111,6 +112,10 @@ public class Manager {
 
             this.executor.shutdown();
         }
+    }
+
+    private void setServerZone(String serverQueueName){
+        this.zoneList.get(this.zoneCounter).setServerQueueName(serverQueueName);
     }
 
     private String giveZone(){
