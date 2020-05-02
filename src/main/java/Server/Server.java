@@ -34,7 +34,7 @@ public class Server extends Console implements Runnable, RmqConfig {
     private String uniqueServeurQueue;
 
 
-    private InformationsServeur informationsServeur;
+    private String serverZone;
     private Object monitor;
 
     private Object soloClient;
@@ -104,7 +104,7 @@ public class Server extends Console implements Runnable, RmqConfig {
         try (ManagerConnection rpcInit = new ManagerConnection(this.connection, this.RPC_INIT_QUEUE_NAME, this.uniqueServeurQueue)) {
             this.log("Requesting Initialisation from manager");
             this.log("Getting data from manager");
-            this.informationsServeur = rpcInit.call();
+            this.serverZone = rpcInit.call();
             this.log("Connection fully establish");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

@@ -16,7 +16,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
 public class Manager {
-    private int i = 0;
+    private int zoneCounter = 0;
     private List<Zone> zoneList = null;
     private String rmqServerIp;
     private MetaDataServer metaDataServer;
@@ -73,7 +73,7 @@ public class Manager {
                 } catch (RuntimeException e) {
                     System.out.println("[MANAGER] " + e.toString());
                 } finally {
-                    channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.getBytes("UTF-8"));
+                    channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, this.giveZone().getBytes());
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
                     // RabbitMq consumer worker thread notifies the RPC server owner thread
                     synchronized (monitor) {
@@ -111,6 +111,11 @@ public class Manager {
 
             this.executor.shutdown();
         }
+    }
+
+    private String giveZone(){
+        this.zoneCounter++;
+        return this.zoneList.get(this.zoneCounter - 1).getNomZone();
     }
 
     /**

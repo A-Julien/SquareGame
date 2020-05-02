@@ -26,7 +26,7 @@ public class ManagerConnection implements AutoCloseable {
     }
 
 
-    public InformationsServeur call() throws IOException, InterruptedException {
+    public String call() throws IOException, InterruptedException {
         final String corrId = UUID.randomUUID().toString();
 
         String replyQueueName = channel.queueDeclare().getQueue();
@@ -47,10 +47,7 @@ public class ManagerConnection implements AutoCloseable {
         }, consumerTag -> {
         });
 
-        String result = response.take();
-        informationsServeur = new InformationsServeur(result);
-        channel.basicCancel(ctag);
-        return informationsServeur;
+        return response.take();
     }
 
     public void close() throws IOException {
