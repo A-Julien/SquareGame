@@ -91,7 +91,7 @@ public class Zone implements Serializable {
     }
 
     public Cell find(Cell cell){
-        for (Cell pos : this.cell)if (pos.equals(cell)) return pos;
+        for (Cell pos : this.cell) if (pos.equals(cell)) return pos;
         return null;
     }
 
