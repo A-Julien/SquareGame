@@ -16,13 +16,13 @@ import java.util.List;
 public class TaskService implements ServerReaction {
     private Channel outChannel;
     private Channel sendBroadcastChanel;
-    private List<Zone> map;
+    private MapService mapService;
     private String myReponsseQueue;
 
-    public TaskService(Channel outChannel, Channel sendBroadcastChanel, List<Zone> map, String myResponsseQueue) {
+    public TaskService(Channel outChannel, Channel sendBroadcastChanel, MapService mapService, String myResponsseQueue) {
         this.outChannel = outChannel;
         this.sendBroadcastChanel = sendBroadcastChanel;
-        this.map = map;
+        this.mapService = mapService;
         this.myReponsseQueue = myResponsseQueue;
     }
 

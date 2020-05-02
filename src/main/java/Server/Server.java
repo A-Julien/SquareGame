@@ -2,12 +2,15 @@ package Server;
 import Configuration.RmqConfig;
 import FX.Console;
 
+import Server.Sevices.MapService;
 import Server.Sevices.TaskService;
 import Utils.Communication;
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
 import Manager.Map.Zone;
+
+import Exception.ZoneNotFound;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +49,7 @@ public class Server extends Console implements Runnable, RmqConfig {
     boolean initOk = false;
 
     private TaskService taskService;
+    private MapService mapService;
 
 
 
@@ -60,7 +64,7 @@ public class Server extends Console implements Runnable, RmqConfig {
     public void run() {
         try {
             this.log("status : " + this.SERVER_NAME + " up");
-            this.initServices();
+            this.initCommunication();
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
         }
@@ -73,7 +77,7 @@ public class Server extends Console implements Runnable, RmqConfig {
      * @throws IOException
      * @throws TimeoutException
      */
-    private void initServices() throws IOException, TimeoutException {
+    private void initCommunication() throws IOException, TimeoutException {
         this.factory = new ConnectionFactory();
         this.factory.setHost(this.RMQ_HOST);
         try{
@@ -93,8 +97,13 @@ public class Server extends Console implements Runnable, RmqConfig {
 
     }
 
-    private void initComputeTask() throws IOException {
+    private void initServices() throws IOException {
         this.outChannel = this.connection.createChannel();
+        try {
+            this.mapService = new MapService(this.map, this.serverZone);
+        } catch (ZoneNotFound zoneNotFound) {
+           this.log("Error while MapService start : " + zoneNotFound.toString());
+        }
         this.taskService = new TaskService(this.outChannel, this.sendBroadcastChanel, this.map, uniqueServeurQueue);
     }
 
@@ -233,7 +242,7 @@ public class Server extends Console implements Runnable, RmqConfig {
             this.log("Received map from manager");
             try {
                 this.map = (ArrayList<Zone>) Communication.deserialize(delivery.getBody());
-                this.initComputeTask();
+                this.initServices();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }

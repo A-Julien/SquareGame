@@ -1,6 +1,5 @@
 package Server.Sevices;
 
-import FX.Client;
 import Manager.Map.Cell;
 import Manager.Map.Zone;
 import Exception.ZoneNotFound;
@@ -27,9 +26,8 @@ public class MapService {
      * @return true if in the server zone
      */
     public boolean isInMyZone(Cell pos) {
-        for (Zone zone : this.map) {
-            if (zone.find(pos) != null) return true;
-        }
+        for (Zone zone : this.map) if (zone.find(pos) != null) return true;
+
         return false;
     }
 
@@ -44,7 +42,7 @@ public class MapService {
         for (Zone zone : this.map) {
             if (zone.find(pos) != null) return zone.getServerQueueName();
         }
-        throw new ZoneNotFound("[MAPSERVICE] Can't find zone with pos : " + pos.toString());
+        throw new ZoneNotFound("Can't find zone with pos : " + pos.toString());
     }
 
 
@@ -60,7 +58,7 @@ public class MapService {
         for (Cell cell : this.map.get(this.indexZone).getCells()) if (cell.equals(pos)) return cell.isOccupation();
 
         throw new PositionNotFound(
-                "[MANAGER] can't find position " +
+                "can't find position " +
                 pos.toString() +
                 "[zone: " +
                 this.map.get(this.indexZone).getNomZone() +
@@ -77,9 +75,8 @@ public class MapService {
      * @throws ClientNotFound if the client to found in the server zone, maybe the client are in a other zone
      */
     public Cell getPosClient(String clientQueue) throws ClientNotFound {
-        for (Cell pos : this.map.get(this.indexZone).getCells()){
-            if(pos.getClientQueue().equals(clientQueue)) return pos;
-        }
+        for (Cell pos : this.map.get(this.indexZone).getCells()) if(pos.getClientQueue().equals(clientQueue)) return pos;
+
         throw new ClientNotFound(
                 "client not found in [zone: " +
                 this.map.get(this.indexZone).getNomZone() +
@@ -132,6 +129,6 @@ public class MapService {
             if (zone.getId() == zoneID) return index;
             index++;
         }
-        throw new ZoneNotFound("[MAPSERVICE] can not resolve zone name");
+        throw new ZoneNotFound("can not resolve zone id : " + zoneID );
     }
 }
