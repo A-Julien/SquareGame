@@ -94,7 +94,7 @@ public class Server extends Console implements Runnable, RmqConfig {
 
     private void initComputeTask() throws IOException {
         this.outChannel = this.connection.createChannel();
-        this.computeTaskServer = new ComputeTaskServer(this.outChannel, this.sendBroadcastChanel, this.map);
+        this.computeTaskServer = new ComputeTaskServer(this.outChannel, this.sendBroadcastChanel, this.map, uniqueServeurQueue);
     }
 
     /**
