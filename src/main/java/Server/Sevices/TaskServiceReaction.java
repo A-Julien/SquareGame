@@ -10,6 +10,6 @@ public interface TaskServiceReaction {
     //public void checkForNeighbors(Cell p);
     void computeFowardedTask(Task task) throws PositionNotFound, IOException;
     void checkForNeighbor(Cell c, String queueClient);
-    void mayNeighbor(Task task);
+    void mayNeighbor(Task task) throws IOException;
     String print();
 }

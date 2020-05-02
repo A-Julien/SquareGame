@@ -142,9 +142,7 @@ public class TaskService implements TaskServiceReaction {
            }
             try {
 
-
                 String queueServerHandlingCible = mapService.whoManageCell(target);
-                System.out.println("LAPSFDJLKQDSFHDPGHDGOKLHDSGOHGDBEGOL ->" + queueServerHandlingCible);
                 task.cmd = target;
 
                 taskToSend = new Task(TaskCommand.FORWARD_MESSAGE, task, myReponsseQueue );
@@ -263,8 +261,12 @@ public class TaskService implements TaskServiceReaction {
     }
 
     @Override
-    public void mayNeighbor(Task task) {
-        //mapService.
+    public void mayNeighbor(Task task) throws IOException {
+        String client = mapService.isSomeOneWhere( (Cell) task.cmd);
+        if(client != null){
+            Task t = new Task(TaskCommand.PING, null , task.replyQueu);
+            this.outChannel.basicPublish("",client, null,  Communication.serialize(t));
+        }
     }
 
 

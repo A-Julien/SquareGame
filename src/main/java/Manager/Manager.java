@@ -96,8 +96,6 @@ public void run() throws MapNotSetException, ServerNotSetException, IOException,
             }
         }
 
-        //Thread.sleep(2000);
-
         Channel channelBroadcastServer = connection.createChannel();
         channelBroadcastServer.exchangeDeclare("INITMAP", "fanout");
 
@@ -148,7 +146,6 @@ public void run() throws MapNotSetException, ServerNotSetException, IOException,
         for(Zone zone : this.zoneList) {
             this.metaDataServer.addServer(zone.getIp(),zone.getPort());
         }
-        System.out.println("cc");
     }
 
     /**

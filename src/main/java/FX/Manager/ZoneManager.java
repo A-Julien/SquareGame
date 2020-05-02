@@ -198,6 +198,15 @@ public class ZoneManager extends BorderPane {
      * build the map and launch manager
      */
     public void eventLaunch(){
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Initialisation");
+        alert.setHeaderText("Initialisation en cours");
+        alert.setContentText("En attente de connexion des serveurs");
+
+
+        alert.showAndWait();
+
         System.out.print("Build map");
         setTop(null);
         //toolBar = new ToolBar(print);
@@ -211,10 +220,8 @@ public class ZoneManager extends BorderPane {
         Zone z = null;
         for(int i = 0; i < grid.getX(); i++){
             for(int j = 0; j < grid.getY(); j++){
-
                 int index = -1;
                 find = false;
-
                 for (Zone zone: finalZone) {
                     if (zone.getId() == grid.cases[i][j].getZ().getId()) { //TODO HUM... PB.. getid()
                         find  = true;
@@ -223,7 +230,6 @@ public class ZoneManager extends BorderPane {
                     }
                     index++;
                 }
-
                 if(!find){
                     z = new Zone(grid.cases[i][j].getZ());
                     z.addCell(new Cell(i, j));
