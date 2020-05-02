@@ -11,7 +11,7 @@ import Manager.Map.Zone;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-
+import Task.*;
 
 
 public class Server extends Console implements Runnable, RmqConfig {
@@ -94,7 +94,7 @@ public class Server extends Console implements Runnable, RmqConfig {
 
     private void initComputeTask() throws IOException {
         this.outChannel = this.connection.createChannel();
-        this.computeTaskServer = new ComputeTaskServer(this.outChannel, this.sendBroadcastChanel, this.map);
+        this.computeTaskServer = new ComputeTaskServer(this.outChannel, this.sendBroadcastChanel, this.map, uniqueServeurQueue);
     }
 
     /**
@@ -125,8 +125,9 @@ public class Server extends Console implements Runnable, RmqConfig {
 
 
             try {
-                ComputeTaskServer t = (ComputeTaskServer) Communication.deserialize(delivery.getBody());
-                System.out.println(" [x] New Task there'" + t.toString() + "'");
+                Task task = (Task) Communication.deserialize(delivery.getBody());
+                computeTaskServer.compute(task);
+                System.out.println(" [x] New Task there'" + task.toString() + "'");
                 //System.out.println(t.compute(work,talkBroadcast));
 
             } catch (ClassNotFoundException e) {
@@ -160,7 +161,7 @@ public class Server extends Console implements Runnable, RmqConfig {
                     .correlationId(delivery.getProperties().getCorrelationId())
                     .build();
 
-            if(false) {
+            if(true) {
                 this.newClientChanel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);   //si place dans la map
             } else {
                 this.newClientChanel.basicNack(delivery.getEnvelope().getDeliveryTag(), true, true);   //si pas place

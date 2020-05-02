@@ -4,7 +4,10 @@ import java.io.Serializable;
 
 public enum TaskCommand implements Serializable {
     MOVE("MOVE"),
-    PRINT("PRINT");
+    PRINT("PRINT"),
+    MOVE_GRANTED("MOVE_GRANTED"),
+    MOVE_NOT_GRANTED("MOVE_NOT_GRANTED"),
+    FORWARD_MESSAGE("FORWARD_MESSAGE");
 
     private final String cmd;
 

@@ -3,6 +3,8 @@ package FX;
 import FX.Map.PositionGrille;
 import Configuration.RmqConfig;
 
+import Task.Task;
+import Task.TaskCommand;
 import Utils.Communication;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -29,7 +31,7 @@ public class Client extends Scene implements RmqConfig {
     int i;
 
     private static final String TASK_QUEUE_NAME = "task_queue";
-    private static String queueCom;
+    private static String queuServer;
     private static String myQueue;
 
     public Client(double largeur, double hauteur) throws IOException, TimeoutException {
@@ -79,8 +81,8 @@ public class Client extends Scene implements RmqConfig {
         Connection connection = factory.newConnection();
         try (RPC_COMMUNICATION rpcC = new RPC_COMMUNICATION(connection, "new_client")) {
             System.out.println(" [x] Request from a server");
-            queueCom = rpcC.call();
-            System.out.println(" [.] Queue = " + queueCom);
+            queuServer = rpcC.call();
+            System.out.println(" [.] Queue = " + queuServer);
         } catch (IOException | TimeoutException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -93,15 +95,26 @@ public class Client extends Scene implements RmqConfig {
 
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            /*try {
-                //TaskClient t = (TaskClient) Communication.deserialize(delivery.getBody());
-                //System.out.println(" [x] New Task there'" + t.toString() + "'");
-                //System.out.println(t.handle(envoyerInformation, myQueue));
+            try {
+                Task task = (Task) Communication.deserialize(delivery.getBody());
+                System.out.println(" [x] New Task there'" + task.toString() + "'");
+                switch (task.cmdType){
+                    case MOVE_GRANTED:
+                        String[] cmd = ((String)task.cmd).trim().split("\\s+");
+                        mouvement(new PositionGrille(Integer.parseInt(cmd[0]), Integer.parseInt(cmd[1])));
+                    break;
+                    default:
+
+                }
+
+
+
+                //System.out.println(t.compute(work,talkBroadcast));
+
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
                 System.out.println("Problem during task");
-            }*/
-           // recevoirInformation.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+            }
 
         };
         recevoirInformation.basicConsume(myQueue, true, deliverCallback, consumerTag -> { });
@@ -115,8 +128,15 @@ public class Client extends Scene implements RmqConfig {
         //envoyerInformation.basicPublish("", queueCom, null, Communication.serialize(task));
 
         PositionGrille newP = new PositionGrille(pos.getX() + mouvement.getX(), pos.getY() + mouvement.getY());
+
         System.out.println(newP);
-        mouvement(newP);
+
+        //Task TaskToSend = new Task(TaskCommand.MOVE,new String(newP.mouvement() + " " + newP.mouvement()), myQueue);
+        Task TaskToSend = new Task(TaskCommand.MOVE,new String(newP.getX() + " " + newP.getY()), myQueue);
+        this.envoyerInformation.basicPublish("",queuServer, null, Communication.serialize(TaskToSend));
+
+
+        //mouvement(newP);
         //setColorGrid(Color.BLUE);
     }
 

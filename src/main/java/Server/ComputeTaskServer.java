@@ -2,6 +2,7 @@ package Server;
 import FX.Map.PositionGrille;
 import Manager.Map.Zone;
 import Task.Task;
+import Task.TaskCommand;
 
 import Utils.Communication;
 import com.rabbitmq.client.Channel;
@@ -15,11 +16,13 @@ public class ComputeTaskServer implements ServerReaction{
     private Channel outChannel;
     private Channel sendBroadcastChanel;
     private List<Zone> map;
+    private String myReponsseQueue;
 
-    public ComputeTaskServer(Channel outChannel, Channel sendBroadcastChanel,  List<Zone> map) {
+    public ComputeTaskServer(Channel outChannel, Channel sendBroadcastChanel,  List<Zone> map, String myResponsseQueue) {
         this.outChannel = outChannel;
         this.sendBroadcastChanel = sendBroadcastChanel;
         this.map = map;
+        this.myReponsseQueue = myResponsseQueue;
     }
 
     public String compute(Task task) throws IOException {
@@ -45,17 +48,28 @@ public class ComputeTaskServer implements ServerReaction{
 
     @Override
     public String playerWantedToMove(Task task) throws IOException {
-        //String[] cmd = ((String)task.cmd).trim().split("\\s+");
-
+        Task TaskToSend;
+        String[] cmd = ((String)task.cmd).trim().split("\\s+");
+        //MapComputer.getCoord(Replyqueue);
+        PositionGrille posActuel = new PositionGrille(0,0);
+        PositionGrille cible = new PositionGrille(posActuel.getX() + Integer.parseInt(cmd[0]),
+                posActuel.getY() + Integer.parseInt(cmd[1]) );
         if (isInZone()) {
-            // MOVE IN THE GRID
-            //TODO COMPUTE
-            //this.outChannel.basicPublish("",task.replyQueu, null, Communication.serialize(TASKCLIENT));
+            // if(MapManager.isFree(PositionGrille p)){
+             if(true){
+                 // Swap Joeur Case X,Y
+                 TaskToSend = new Task(TaskCommand.MOVE_GRANTED, new String(cible.getX() + " " + cible.getY()), null );
+            } else {
+                 TaskToSend = new Task(TaskCommand.MOVE_NOT_GRANTED,null, null);
+            }
+
+            this.outChannel.basicPublish("",task.replyQueu, null, Communication.serialize(TaskToSend));
             //fannout.basicPublish("BROADCAST", "", null, Communication.serialize(pingMooveSerer));
 
             return "Task Handled Correctly";
         } else {
-            //forward("QUEUE_SERVEUR_QUI_GERE_ZONE", channel);
+            TaskToSend = new Task(TaskCommand.FORWARD_MESSAGE, task, myReponsseQueue );
+          //  this.outChannel.basicPublish("",ReplyQueueForward, null, Communication.serialize(TaskToSend));
             return "task forwarded";
         }
     }
