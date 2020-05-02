@@ -76,11 +76,11 @@ public class Manager {
                 } finally {
                     channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, Communication.serialize(this.giveZone()));
                     channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+
                     // RabbitMq consumer worker thread notifies the RPC server owner thread
                     synchronized (monitor) {
                         monitor.notify();
                     }
-
                 }
             };
             System.out.println("[MANAGER] Awaiting RPC requests from Server");
@@ -103,6 +103,8 @@ public class Manager {
                 }
             }
 
+            Thread.sleep(2000);
+
             Channel channelBroadcastServer = connection.createChannel();
             channelBroadcastServer.exchangeDeclare("INITMAP", "fanout");
 
@@ -111,6 +113,8 @@ public class Manager {
             channelBroadcastServer.basicPublish("INITMAP", "", null, Communication.serialize(this.zoneList));
 
             if(this.metaDataServer.getNbLocalSever() != 0) this.executor.shutdown();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -149,8 +153,7 @@ public class Manager {
      */
     private void digestServer() throws MapNotSetException {
         this.requireMap();
-        for(Zone zone : this.zoneList)
-            this.metaDataServer.addServer(zone.getIp(),zone.getPort());
+        for(Zone zone : this.zoneList) this.metaDataServer.addServer(zone.getIp(),zone.getPort());
     }
 
     /**
