@@ -16,7 +16,7 @@ public class ComputeTaskServer implements ServerReaction{
     private Channel sendBroadcastChanel;
     private List<Zone> map;
 
-    public void ComputeTaskServer(Channel outChannel, Channel sendBroadcastChanel,  List<Zone> map) {
+    public ComputeTaskServer(Channel outChannel, Channel sendBroadcastChanel,  List<Zone> map) {
         this.outChannel = outChannel;
         this.sendBroadcastChanel = sendBroadcastChanel;
         this.map = map;
@@ -60,14 +60,19 @@ public class ComputeTaskServer implements ServerReaction{
         }
     }
 
+    @Override
+    public void computeFowardedTask(Task task) {
+
+    }
+
     /*@Override
     public void checkForNeighbors(PositionGrille p) {
     }*/
 
-    @Override
+   /* @Override
     public boolean newPlayer() {
         return true;
-    }
+    }*/
 
     @Override
     public void forwardMessage() {
