@@ -97,7 +97,7 @@ public class MapService {
      * @throws ClientNotFound if the client to found in the server zone, maybe the client are in a other zone
      */
     public Cell getPosClient(String clientQueue) throws ClientNotFound {
-        for (Cell pos : this.map.get(this.indexZone).getCells()) if(pos.getClientQueue().equals(clientQueue)) return pos;
+        for (Cell pos : this.map.get(this.indexZone).getCells()) if(pos.getClientQueue() != null && pos.getClientQueue().equals(clientQueue)) return pos;
 
         throw new ClientNotFound(
                 "client not found in (zone: " +
@@ -146,6 +146,7 @@ public class MapService {
      * @throws PositionError verify if position exist
      */
     public void cleanCell(String clientQueue) throws ClientNotFound, PositionError {
+
         (this.getPosClient(clientQueue)).clientLeave();
     }
 

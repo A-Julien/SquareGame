@@ -11,6 +11,7 @@ import java.io.IOException;
 import Manager.Map.Zone;
 
 import Exception.ZoneNotFound;
+import Exception.CellNotFound;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +84,7 @@ public class Server extends Console implements Runnable, RmqConfig {
         try{
             this.connection = factory.newConnection();
         } catch ( Exception e ) {
-            System.out.println("Connection Failed");
+            this.log("Connection Failed");
             java.lang.System.exit(-1);
         }
 
@@ -103,6 +104,7 @@ public class Server extends Console implements Runnable, RmqConfig {
             this.mapService = new MapService(this.map, this.serverZone);
         } catch (ZoneNotFound zoneNotFound) {
            this.log("Error while MapService start : " + zoneNotFound.toString());
+           System.exit(-1);
         }
         this.taskService = new TaskService(this.outChannel, this.sendBroadcastChanel, this.mapService, uniqueServeurQueue);
     }
@@ -129,20 +131,21 @@ public class Server extends Console implements Runnable, RmqConfig {
     private void initClientCallbackInstruction() throws IOException{
         this.incomingInstruction = connection.createChannel();
         this.uniqueServeurQueue =  incomingInstruction.queueDeclare("", true, false, false, null).getQueue();
-
+        incomingInstruction.basicQos(1);
         this.log("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
 
 
             try {
+
                 Task task = (Task) Communication.deserialize(delivery.getBody());
+                this.log(" [x] New Task there'" + task.toString() + "'");
                 taskService.compute(task);
-                System.out.println(" [x] New Task there'" + task.toString() + "'");
-                //System.out.println(t.compute(work,talkBroadcast));
+
 
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-                System.out.println("Problem during task");
+                this.log("Problem during task");
             }
           //  work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         };
@@ -162,29 +165,40 @@ public class Server extends Console implements Runnable, RmqConfig {
 
         this.newClientChanel.basicQos(1);
 
-        //this.soloClient = new Object();
+
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             AMQP.BasicProperties replyProps = new AMQP.BasicProperties
                     .Builder()
                     .correlationId(delivery.getProperties().getCorrelationId())
                     .build();
 
-            if(true) {
-                this.newClientChanel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);   //si place dans la map
-            } else {
-                this.newClientChanel.basicNack(delivery.getEnvelope().getDeliveryTag(), true, true);   //si pas place
+
+            Task task = null;
+            try {
+                task = (Task) Communication.deserialize(delivery.getBody());
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
 
+
+            this.log("New client there ");
             this.log("try to find place for client");
 
 
-            //TODO verifier si de la place dispo dans ses case
-            System.out.println("New client there");
-            this.newClientChanel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, uniqueServeurQueue.getBytes("UTF-8"));
-            // RabbitMq consumer worker thread notifies the RPC server owner thread
-            //synchronized (soloClient) {
-              //  soloClient.notify();
-            //}
+            try {
+                this.newClientChanel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);   //si place dans la map
+
+                Task taskSend = new Task(TaskCommand.INIT,  mapService.initPositionClient(task.replyQueu), uniqueServeurQueue);
+
+                this.newClientChanel.basicPublish("", task.replyQueu, replyProps, Communication.serialize(taskSend));
+
+
+            } catch (CellNotFound e){
+                this.newClientChanel.basicNack(delivery.getEnvelope().getDeliveryTag(), true, true);   //si pas place
+            }
+
+
+
 
 
         };
@@ -212,11 +226,11 @@ public class Server extends Console implements Runnable, RmqConfig {
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             try {
                 TaskService t = (TaskService) Communication.deserialize(delivery.getBody());
-                System.out.println(" [x] New Task there'" + t.toString() + "'");
-                //System.out.println(t.compute(work,broadcast));
+                this.log(" [x] New Task there'" + t.toString() + "'");
+                //this.log(t.compute(work,broadcast));
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
-                System.out.println("Problem during BROADCAST");
+                this.log("Problem during BROADCAST");
             }
         };
         this.recievedBroadcastChanel.basicConsume(BROADCAST_QUEUE, true, deliverCallback, consumerTag -> { });

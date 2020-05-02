@@ -2,7 +2,7 @@ package FX;
 
 import Manager.Map.Cell;
 import Configuration.RmqConfig;
-
+import Task.Deplacement;
 import Task.Task;
 import Task.TaskCommand;
 import Utils.Communication;
@@ -20,7 +20,7 @@ import javafx.scene.paint.Color;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-import Client.RPC_COMMUNICATION;
+
 
 public class Client extends Scene implements RmqConfig {
     BorderPane borderPane;
@@ -29,10 +29,12 @@ public class Client extends Scene implements RmqConfig {
 
     Cell pos;
     int i;
+    boolean synchro;
 
     private static final String TASK_QUEUE_NAME = "task_queue";
     private static String queuServer;
     private static String myQueue;
+
 
     public Client(double largeur, double hauteur) throws IOException, TimeoutException {
         super(new BorderPane(),  largeur,  hauteur);
@@ -41,32 +43,37 @@ public class Client extends Scene implements RmqConfig {
         grid = new Grid(10,10,hauteur*0.9,largeur*0.9, false);
 
         this.pos = new Cell(0,0);
-        grid.affCircle();
-        borderPane.setCenter(grid);
 
+        borderPane.setCenter(grid);
+        synchro = false;
 
 
         EventHandler<KeyEvent> clavier = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent key) {
+
+                Deplacement dep;
+
                 Cell p = new Cell(0,0);
-                boolean dep = false;
+
                 if(key.getCode()== KeyCode.Q || key.getCode()== KeyCode.LEFT) {
-                    System.out.println("Déplacement gauche");
-                    p.setX(-1);
+                    System.out.println("Déplacement GAUCHE");
+                 dep = Deplacement.GAUCHE;
                 } else if(key.getCode()== KeyCode.D || key.getCode()== KeyCode.RIGHT) {
                     System.out.println("Déplacement droite");
-                    p.setX(1);
+                    dep = Deplacement.DROITE;
                 } else if(key.getCode()== KeyCode.Z || key.getCode()== KeyCode.UP) {
                     System.out.println("Déplacement Haut");
-                    p.setY(-1);
+                    dep = Deplacement.HAUT;
                 } else if(key.getCode()== KeyCode.S || key.getCode()== KeyCode.DOWN) {
-                    System.out.println("Déplacement Bas");
+                    dep = Deplacement.BAS;
                     p.setY(1);
+                } else {
+                    return;
                 }
 
                 try {
-                    handleMouvement(p);
+                    handleMouvement(dep);
                 } catch (IOException e) {
                     System.out.println("Impossible de communiquer avec le serveur");
                     e.printStackTrace();
@@ -79,39 +86,48 @@ public class Client extends Scene implements RmqConfig {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(RMQ_SERVER_IP);
         Connection connection = factory.newConnection();
-        try (RPC_COMMUNICATION rpcC = new RPC_COMMUNICATION(connection, "new_client")) {
-            System.out.println(" [x] Request from a server");
-            queuServer = rpcC.call();
-            System.out.println(" [.] Queue = " + queuServer);
-        } catch (IOException | TimeoutException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Sending message");
-        this.envoyerInformation = connection.createChannel();
-        Channel recevoirInformation = connection.createChannel();
 
+        envoyerInformation = connection.createChannel();
+        Channel recevoirInformation = connection.createChannel();
         myQueue = recevoirInformation.queueDeclare().getQueue();
-        System.out.println("Ma queue " + myQueue);
 
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             try {
                 Task task = (Task) Communication.deserialize(delivery.getBody());
                 System.out.println(" [x] New Task there'" + task.toString() + "'");
+
                 switch (task.cmdType){
+                    case INIT:
+                        queuServer = task.replyQueu;
+                        this.pos = (Cell) task.cmd;
+                        this.grid.setPosCircle(pos.getX(), pos.getY());
+
+                        System.out.println("On m'as assigné la position" + pos);
+                        break;
                     case MOVE_GRANTED:
-                        String[] cmd = ((String)task.cmd).trim().split("\\s+");
-                        mouvement(new Cell(Integer.parseInt(cmd[0]), Integer.parseInt(cmd[1])));
+                        mouvement((Cell) task.cmd);
+
+
+
+
                     break;
+
+                    case MOVE_GRANTED_FORWARDED:
+                       // this.envoyerInformation.close();
+                       // this.envoyerInformation = connection.createChannel();
+
+                        queuServer = task.replyQueu;
+                        mouvement((Cell) task.cmd);
+                        // CHANGER COULEUR ? :)
+
+                        break;
                     default:
 
                 }
 
 
-
-                //System.out.println(t.compute(work,talkBroadcast));
-
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException  e) {
                 e.printStackTrace();
                 System.out.println("Problem during task");
             }
@@ -119,25 +135,25 @@ public class Client extends Scene implements RmqConfig {
         };
         recevoirInformation.basicConsume(myQueue, true, deliverCallback, consumerTag -> { });
 
+        // INITIALISE LA CONNECTION
+        Task TaskToSend = new Task(TaskCommand.INIT, null, myQueue);
+        this.envoyerInformation.basicPublish("",POOL_CLIENT_QUEUE, null, Communication.serialize(TaskToSend));
+        this.grid.affCircle();
     }
 
-    public void handleMouvement(Cell mouvement) throws IOException {
+
+
+
+
+
+    public void handleMouvement(Deplacement mouvement) throws IOException {
         System.out.println("Déplacement souhaité : " + mouvement);
-       // AskServer mouvement
-        //TaskServer task = new TaskServer("MOVE " + mouvement.getX() +" " +mouvement.getY(), myQueue);
-        //envoyerInformation.basicPublish("", queueCom, null, Communication.serialize(task));
-
-        Cell newP = new Cell(pos.getX() + mouvement.getX(), pos.getY() + mouvement.getY());
-
-        System.out.println(newP);
-
-        //Task TaskToSend = new Task(TaskCommand.MOVE,new String(newP.mouvement() + " " + newP.mouvement()), myQueue);
-        Task TaskToSend = new Task(TaskCommand.MOVE,new String(newP.getX() + " " + newP.getY()), myQueue);
+       // Cell to = new Cell(pos.getX() + mouvement.getX(), pos.getY()+mouvement.getY());
+        Task TaskToSend = new Task(TaskCommand.MOVE,mouvement, myQueue);
         this.envoyerInformation.basicPublish("",queuServer, null, Communication.serialize(TaskToSend));
 
 
-        //mouvement(newP);
-        //setColorGrid(Color.BLUE);
+
     }
 
     public void mouvement(Cell p){

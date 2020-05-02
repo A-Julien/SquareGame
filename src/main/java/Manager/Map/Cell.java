@@ -34,8 +34,9 @@ public class Cell implements Serializable {
         return "["+getX()+";"+getY()+"]";
     }
 
-    public Cell plus(Cell p){
-        return new Cell(x + p.getX(), y + p.getX());
+    public void plus(Cell p){
+        x += p.getX();
+        y += p.getY();
     }
 
     @Override
