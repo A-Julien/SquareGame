@@ -14,7 +14,6 @@ public class ManagerConnection implements AutoCloseable {
 
     private Connection connection;
     private Channel channel;
-    InformationsServeur informationsServeur;
     String requestQueueName;
     String uniqueQueueServer;
 

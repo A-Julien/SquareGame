@@ -1,6 +1,8 @@
-package Server;
+package Server.Sevices;
 import Manager.Map.Cell;
 import Manager.Map.Zone;
+
+import Server.ServerReaction;
 import Task.Task;
 import Task.TaskCommand;
 
@@ -11,13 +13,13 @@ import java.io.IOException;
 import java.util.List;
 
 
-public class ComputeTaskServer implements ServerReaction{
+public class TaskService implements ServerReaction {
     private Channel outChannel;
     private Channel sendBroadcastChanel;
     private List<Zone> map;
     private String myReponsseQueue;
 
-    public ComputeTaskServer(Channel outChannel, Channel sendBroadcastChanel,  List<Zone> map, String myResponsseQueue) {
+    public TaskService(Channel outChannel, Channel sendBroadcastChanel, List<Zone> map, String myResponsseQueue) {
         this.outChannel = outChannel;
         this.sendBroadcastChanel = sendBroadcastChanel;
         this.map = map;

@@ -1,6 +1,5 @@
 package Client;
 
-import Server.InformationsServeur;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -15,7 +14,6 @@ public class RPC_COMMUNICATION implements AutoCloseable {
 
     private Connection connection;
     private Channel channel;
-    InformationsServeur informationsServeur;
     String requestQueueName;
 
     public RPC_COMMUNICATION(Connection connection, String requestQueueName) throws IOException, TimeoutException {

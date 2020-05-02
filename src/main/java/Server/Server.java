@@ -2,6 +2,7 @@ package Server;
 import Configuration.RmqConfig;
 import FX.Console;
 
+import Server.Sevices.TaskService;
 import Utils.Communication;
 import com.rabbitmq.client.*;
 
@@ -44,7 +45,7 @@ public class Server extends Console implements Runnable, RmqConfig {
 
     boolean initOk = false;
 
-    private ComputeTaskServer computeTaskServer;
+    private TaskService taskService;
 
 
 
@@ -94,7 +95,7 @@ public class Server extends Console implements Runnable, RmqConfig {
 
     private void initComputeTask() throws IOException {
         this.outChannel = this.connection.createChannel();
-        this.computeTaskServer = new ComputeTaskServer(this.outChannel, this.sendBroadcastChanel, this.map, uniqueServeurQueue);
+        this.taskService = new TaskService(this.outChannel, this.sendBroadcastChanel, this.map, uniqueServeurQueue);
     }
 
     /**
@@ -126,7 +127,7 @@ public class Server extends Console implements Runnable, RmqConfig {
 
             try {
                 Task task = (Task) Communication.deserialize(delivery.getBody());
-                computeTaskServer.compute(task);
+                taskService.compute(task);
                 System.out.println(" [x] New Task there'" + task.toString() + "'");
                 //System.out.println(t.compute(work,talkBroadcast));
 
@@ -201,7 +202,7 @@ public class Server extends Console implements Runnable, RmqConfig {
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             try {
-                ComputeTaskServer t = (ComputeTaskServer) Communication.deserialize(delivery.getBody());
+                TaskService t = (TaskService) Communication.deserialize(delivery.getBody());
                 System.out.println(" [x] New Task there'" + t.toString() + "'");
                 //System.out.println(t.compute(work,broadcast));
             } catch (ClassNotFoundException e) {
