@@ -3,10 +3,8 @@ package Server.Sevices;
 import Manager.Map.Cell;
 import Manager.Map.Zone;
 import Exception.ZoneNotFound;
-import Exception.PositionNotFound;
-import Exception.ClientNotFound;
-import Exception.PositionError;
-import Exception.ClientActionError;
+import Exception.*;
+
 
 import java.util.List;
 
@@ -17,6 +15,18 @@ public class MapService {
     public MapService(List<Zone> map, Integer zoneID) throws ZoneNotFound {
         this.map = map;
         this.indexZone = this.getIndexZone(zoneID);
+    }
+
+
+    /**
+     * Return free cell if exist
+     *
+     * @return cell
+     * @throws CellNotFound if exist no free cell
+     */
+    public Cell getFreeCell() throws CellNotFound {
+        for (Cell cell : this.map.get(this.indexZone).getCells()) if(!cell.isOccupation()) return cell;
+        throw new CellNotFound("Can not find free cell");
     }
 
     /**

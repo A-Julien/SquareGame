@@ -110,7 +110,7 @@ public class Manager {
 
             channelBroadcastServer.basicPublish("INITMAP", "", null, Communication.serialize(this.zoneList));
 
-            this.executor.shutdown();
+            if(this.metaDataServer.getNbLocalSever() != 0) this.executor.shutdown();
         }
     }
 
