@@ -220,19 +220,16 @@ public class ZoneManager extends BorderPane {
         Zone z = null;
         for(int i = 0; i < grid.getX(); i++){
             for(int j = 0; j < grid.getY(); j++){
-
                 int index = -1;
                 find = false;
-
                 for (Zone zone: finalZone) {
-                    if (zone.getNomZone() == grid.cases[i][j].getZ().getNomZone()) { //TODO HUM... PB.. getid()
+                    if (grid.cases[i][j].getZ().getNomZone().equals(zone.getNomZone())) {
                         find  = true;
                         index++;
                         break;
                     }
                     index++;
                 }
-
                 if(!find){
                     z = new Zone(grid.cases[i][j].getZ());
                     z.addCell(new Cell(i, j));
