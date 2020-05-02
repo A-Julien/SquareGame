@@ -12,7 +12,8 @@ public enum TaskCommand implements Serializable {
     FORWARD_APPROVED("FORWARD_APPROVED"),
     MOVE_GRANTED_FORWARDED("MOVE_GRANTED_FORWARDED"),
     CLIENT_NOT_FOUNDED("CLIENT_NOT_FOUNDED"),
-    NEIHGBOR("NEIHGBOR");
+    NEIHGBOR("NEIHGBOR"),
+    GET_COLOR("COLOR");
 
     private final String cmd;
 

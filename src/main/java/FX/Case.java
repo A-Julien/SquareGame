@@ -37,7 +37,7 @@ public class Case extends Rectangle {
 
     public void setZone(ZoneFx zone){
         this.z = zone;
-        changerCouleur(z.getColor());
+        changerCouleur(z.getZoneColor());
     }
 
     public void removeZone(){
@@ -51,7 +51,7 @@ public class Case extends Rectangle {
 
     public void setZ(ZoneFx z) {
         this.z = z;
-        changerCouleur(z.getColor());
+        changerCouleur(z.getZoneColor());
     }
     @Override
     public String toString() {

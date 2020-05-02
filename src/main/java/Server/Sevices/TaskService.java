@@ -1,8 +1,6 @@
 package Server.Sevices;
 import Manager.Map.Cell;
-import Manager.Map.Zone;
 
-import Server.ServerReaction;
 import Task.Task;
 import Task.TaskCommand;
 import Task.Deplacement;
@@ -11,11 +9,10 @@ import Utils.Communication;
 import com.rabbitmq.client.Channel;
 
 import java.io.IOException;
-import java.util.List;
 
 import Exception.*;
 
-public class TaskService implements ServerReaction {
+public class TaskService implements TaskServiceReaction {
     private Channel outChannel;
     private Channel sendBroadcastChanel;
     private MapService mapService;
@@ -28,7 +25,7 @@ public class TaskService implements ServerReaction {
         this.myReponsseQueue = myResponsseQueue;
     }
 
-    public String compute(Task task) throws IOException {
+    public String compute(Task task) throws IOException, UnknownCmd {
         switch(task.cmdType) {
             case MOVE:
                 this.playerWantedToMove(task);
@@ -50,7 +47,12 @@ public class TaskService implements ServerReaction {
                 break;
             case NEIHGBOR:
                 mayNeighbor(task);
+                break;
+            case GET_COLOR:
+                this.playerWantColorZone(task);
+                break;
             default:
+                throw new UnknownCmd(task.cmd + " not a valid server command");
         }
         return "Tache innconue "; //+ this.cmd + " de type " + this.type;
     }
@@ -64,7 +66,30 @@ public class TaskService implements ServerReaction {
     }
 
     /**
-     * A client want to moove from is potision to either left, up , rigth, down resp (-1;0) (0,-1) (1,0) (0,1)
+     * Send color to client
+     *
+     * @param task the task to compute
+     * @throws IOException serialisation error
+     */
+    @Override
+    public void playerWantColorZone(Task task) throws IOException {
+        this.outChannel.basicPublish(
+                "",
+                task.replyQueu,
+                null,
+                Communication.serialize(
+                        new Task(
+                                TaskCommand.GET_COLOR,
+                                this.mapService.getZoneColor(),
+                                null
+                        )
+                )
+        );// même nachos est plus lisible !!
+    }
+
+
+    /**
+     * A client want to move from is potision to either left, up , rigth, down resp (-1;0) (0,-1) (1,0) (0,1)
      * @param task
      * @return
      * @throws IOException
@@ -135,12 +160,6 @@ public class TaskService implements ServerReaction {
             taskToSend = new Task(TaskCommand.CLIENT_NOT_FOUNDED, null , null);
              this.outChannel.basicPublish("",task.replyQueu, null, null);
         }
-
-
-
-
-
-
     }
 
     /**

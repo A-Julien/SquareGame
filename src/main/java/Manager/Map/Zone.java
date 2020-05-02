@@ -1,6 +1,5 @@
 package Manager.Map;
 
-import javafx.scene.paint.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -11,11 +10,18 @@ public class Zone implements Serializable {
     private String serverQueueName;
     private String ip = "auto";
     private String port = "auto";
+    private Color zoneColor = null;
     private ArrayList<Cell> cell;
 
 
     public String getServerQueueName() {
         return serverQueueName;
+    }
+
+    public void setColor(double red, double green, double blue) {
+        if (this.zoneColor == null) {
+            this.zoneColor = new Color(red, green, blue);
+        }
     }
 
     public void setServerQueueName(String serverQueueName) {
@@ -30,7 +36,7 @@ public class Zone implements Serializable {
         this.cell = cell;
     }
 
-    public Zone(String nom, Color c){
+    public Zone(String nom){
         this.nomZone = nom;
         this.id = compteur_id;
         compteur_id++;
@@ -91,5 +97,9 @@ public class Zone implements Serializable {
     public Cell find(Cell cell){
         for (Cell pos : this.cell)if (pos.equals(cell)) return pos;
         return null;
+    }
+
+    public Color getNonFxZoneColor() {
+        return zoneColor;
     }
 }

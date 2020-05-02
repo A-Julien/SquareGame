@@ -224,6 +224,12 @@ public class ZoneManager extends BorderPane {
                 if(!find){
                     z = new Zone(grid.cases[i][j].getZ());
                     z.addCell(new Cell(i, j));
+                    z.setColor(
+                            (grid.cases[i][j].getZ()).getZoneColor().getRed(),
+                            (grid.cases[i][j].getZ()).getZoneColor().getGreen(),
+                            (grid.cases[i][j].getZ()).getZoneColor().getBlue()
+                    );
+
                     finalZone.add(z);
                 } else {
                     finalZone.get(index).addCell(new Cell(i, j));

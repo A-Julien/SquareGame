@@ -99,20 +99,25 @@ public class Client extends Scene implements RmqConfig {
 
                 switch (task.cmdType){
                     case INIT:
-                        queuServer = task.replyQueu;
-                        this.pos = (Cell) task.cmd;
-                        this.grid.setPosCircle(pos.getX(), pos.getY());
-
-                        System.out.println("On m'as assigné la position" + pos);
+                            queuServer = task.replyQueu;
+                            this.pos = (Cell) task.cmd;
+                            this.grid.setPosCircle(pos.getX(), pos.getY());
+                            this.requestServerColor();
+                            System.out.println("On m'as assigné la position" + pos);
                         break;
                     case MOVE_GRANTED:
                         mouvement((Cell) task.cmd);
-
-
-
-
                     break;
+                    case GET_COLOR:
 
+
+                        this.setColorGrid(
+                                Color.color(((Manager.Map.Color)task.cmd).red,
+                                        ((Manager.Map.Color )task.cmd).green,
+                                        ((Manager.Map.Color )task.cmd).blue
+                                )
+                        );
+                        break;
                     case MOVE_GRANTED_FORWARDED:
                        // this.envoyerInformation.close();
                        // this.envoyerInformation = connection.createChannel();
@@ -120,6 +125,7 @@ public class Client extends Scene implements RmqConfig {
                         queuServer = task.replyQueu;
                         mouvement((Cell) task.cmd);
                         // CHANGER COULEUR ? :)
+                        this.requestServerColor();
 
                         break;
                     default:
@@ -142,26 +148,26 @@ public class Client extends Scene implements RmqConfig {
     }
 
 
+    private void requestServerColor() throws IOException {
+        Task TaskToSend = new Task(TaskCommand.GET_COLOR,null, myQueue);
+        this.envoyerInformation.basicPublish("",queuServer, null, Communication.serialize(TaskToSend));
+    }
 
 
 
-
-    public void handleMouvement(Deplacement mouvement) throws IOException {
+    private void handleMouvement(Deplacement mouvement) throws IOException {
         System.out.println("Déplacement souhaité : " + mouvement);
        // Cell to = new Cell(pos.getX() + mouvement.getX(), pos.getY()+mouvement.getY());
         Task TaskToSend = new Task(TaskCommand.MOVE,mouvement, myQueue);
         this.envoyerInformation.basicPublish("",queuServer, null, Communication.serialize(TaskToSend));
-
-
-
     }
 
-    public void mouvement(Cell p){
+    private void mouvement(Cell p){
         pos = p;
         grid.setPosCircle(pos.getX(), pos.getY());
     }
 
-    public void setColorGrid(Color c){
+    private void setColorGrid(javafx.scene.paint.Color c){
         for(int i = 0; i < grid.getX(); i++){
             for(int j = 0; j < grid.getY(); j++){
                 grid.getCell(i,j).changerCouleur(c);

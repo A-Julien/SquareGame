@@ -10,8 +10,7 @@ import com.rabbitmq.client.*;
 import java.io.IOException;
 import Manager.Map.Zone;
 
-import Exception.ZoneNotFound;
-import Exception.CellNotFound;
+import Exception.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -143,7 +142,7 @@ public class Server extends Console implements Runnable, RmqConfig {
                 taskService.compute(task);
 
 
-            } catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException | UnknownCmd e) {
                 e.printStackTrace();
                 this.log("Problem during task");
             }

@@ -5,14 +5,13 @@ import javafx.event.EventHandler;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
 
 public class ZoneFx extends Zone {
     public ColorPicker colorPicker;
     EventHandler<ActionEvent> eventColorPicker;
 
     public ZoneFx(String nom, Color color){
-        super(nom, color);
+        super(nom);
         this.colorPicker = new ColorPicker();
         colorPicker.setValue(color);
     }
@@ -25,7 +24,7 @@ public class ZoneFx extends Zone {
         this.colorPicker = colorPicker;
     }
 
-    public Color getColor(){
+    public Color getZoneColor(){
         return colorPicker.getValue();
     }
 

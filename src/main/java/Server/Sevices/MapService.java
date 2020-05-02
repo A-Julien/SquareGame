@@ -1,6 +1,7 @@
 package Server.Sevices;
 
 import Manager.Map.Cell;
+import Manager.Map.Color;
 import Manager.Map.Zone;
 import Exception.ZoneNotFound;
 import Exception.*;
@@ -17,6 +18,15 @@ public class MapService {
         this.indexZone = this.getIndexZone(zoneID);
     }
 
+
+    /**
+     * Return the server zone color
+     *
+     * @return the server zone color
+     */
+    public Color getZoneColor(){
+        return this.map.get(this.indexZone).getNonFxZoneColor();
+    }
 
     /***
      *
