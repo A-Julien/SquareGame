@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class Zone implements Serializable {
-    private static int compteur_id = 0;
     int id;
     private String nomZone;
     private String serverQueueName;
@@ -38,15 +37,12 @@ public class Zone implements Serializable {
 
     public Zone(String nom){
         this.nomZone = nom;
-        this.id = compteur_id;
-        compteur_id++;
         cell = new ArrayList<>();
     }
 
     public Zone(ZoneFx zone){
         this.nomZone = zone.getNomZone();
-        this.id = compteur_id;
-        compteur_id++;
+        this.id = zone.getId();
         this.cell = zone.getCells();
         this.ip = zone.getIp();
         this.port = zone.getPort();

@@ -216,7 +216,7 @@ public class ZoneManager extends BorderPane {
                 find = false;
 
                 for (Zone zone: finalZone) {
-                    if (zone.getNomZone() == grid.cases[i][j].getZ().getNomZone()) { //TODO HUM... PB.. getid()
+                    if (zone.getId() == grid.cases[i][j].getZ().getId()) { //TODO HUM... PB.. getid()
                         find  = true;
                         index++;
                         break;

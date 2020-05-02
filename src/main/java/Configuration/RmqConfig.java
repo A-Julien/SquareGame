@@ -6,4 +6,5 @@ public interface RmqConfig {
     String POOL_CLIENT_QUEUE = "new_client";
     String INITMAP_EXCHANGE = "INITMAP";
     String BROADCAST_EXCHANGE = "BROADCAST";
+    String RMQ_SERVER_READY = "SERVER_READY";
 }

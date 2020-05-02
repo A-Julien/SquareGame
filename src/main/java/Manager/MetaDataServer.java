@@ -12,7 +12,10 @@ public class MetaDataServer {
     }
 
     public void addServer(String ip, String port){
-        if(ip.equals("auto")) this.nbLocalSever++;
+        if(ip.equals("auto")) {
+            this.nbLocalSever++;
+            return;
+        }
         this.serverListInfo.put(ip, port);
     }
 
@@ -21,7 +24,7 @@ public class MetaDataServer {
     }
 
     public int getNbServer(){
-        return this.serverListInfo.size();
+        return this.serverListInfo.size() + this.nbLocalSever;
     }
 
     public HashMap<String, String> getServerListInfo() {

@@ -22,6 +22,9 @@ public class Manager {
     private MetaDataServer metaDataServer;
     private int nbThreads;
     private ThreadPoolExecutor executor;
+    private Connection connection;
+    private Integer ServerCount = 0;
+    private final static Object monitor = new Object();
 
     public Manager(String rmqServerIp, int nbThreads) {
         this.rmqServerIp = rmqServerIp;
@@ -40,83 +43,72 @@ public class Manager {
      * @throws MapNotSetException just security, can not start if map not set
      * @throws ServerNotSetException just security, can not start if Server not set
      */
-    public void run() throws MapNotSetException, ServerNotSetException, IOException, TimeoutException {
-        this.digestServer();
-        this.requireMap();
-        this.requireServerExtracted();
+public void run() throws MapNotSetException, ServerNotSetException, IOException, TimeoutException {
+    this.digestServer();
+    this.requireMap();
+    this.requireServerExtracted();
 
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(this.rmqServerIp);
+    ConnectionFactory factory = new ConnectionFactory();
+    factory.setHost(this.rmqServerIp);
+    connection = factory.newConnection();
 
-        try (Connection connection = factory.newConnection();
-             Channel channel = connection.createChannel()) {
+    try (Channel channel = connection.createChannel()) {
 
-            channel.queueDeclare(RmqConfig.RPC_QUEUE_NAME, false, false, false, null);
-            channel.queuePurge(RmqConfig.RPC_QUEUE_NAME);
+        channel.queueDeclare(RmqConfig.RPC_QUEUE_NAME, false, false, false, null);
+        channel.queuePurge(RmqConfig.RPC_QUEUE_NAME);
 
-            channel.basicQos(1);
+        channel.basicQos(1);
 
-            System.out.println("[MANAGER] Manager connected to RmqServer");
+        System.out.println("[MANAGER] Manager connected to RmqServer");
 
-            Object monitor = new Object();
-            DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-                AMQP.BasicProperties replyProps = new AMQP.BasicProperties
-                        .Builder()
-                        .correlationId(delivery.getProperties().getCorrelationId())
-                        .build();
+        //monitor = new Object();
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+            AMQP.BasicProperties replyProps = new AMQP.BasicProperties
+                    .Builder()
+                    .correlationId(delivery.getProperties().getCorrelationId())
+                    .build();
+                String message = new String(delivery.getBody(), "UTF-8");
+                System.out.println("[MANAGER] New Server found  " + message);
+                this.setServerZone(message);
 
-                String response = "";
-
-                try {
-                    String message = new String(delivery.getBody(), "UTF-8");
-                    System.out.println("[MANAGER] New Server found  " + message);
-                    this.setServerZone(message);
-                } catch (RuntimeException e) {
-                    System.out.println("[MANAGER] " + e.toString());
-                } finally {
-                    channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, Communication.serialize(this.giveZone()));
-                    channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-
-                    // RabbitMq consumer worker thread notifies the RPC server owner thread
+                channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, Communication.serialize(this.giveZone()));
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+                ServerCount++;
+                System.out.println("[MANAGER] " + ServerCount + " server found of " + this.metaDataServer.getNbServer());
+                if(ServerCount == this.metaDataServer.getNbServer()) {
                     synchronized (monitor) {
                         monitor.notify();
                     }
                 }
-            };
-            System.out.println("[MANAGER] Awaiting RPC requests from Server");
-            channel.basicConsume(RmqConfig.RPC_QUEUE_NAME, false, deliverCallback, (consumerTag -> { }));
+        };
 
-            this.createServer();
+        System.out.println("[MANAGER] Awaiting " + this.metaDataServer.getNbServer() + " RPC requests from Server");
+        channel.basicConsume(RmqConfig.RPC_QUEUE_NAME, false, deliverCallback, (consumerTag -> { }));
 
-            // Wait and be prepared to consume the message from RPC client.
-            int i = 0;
-            while (i < this.metaDataServer.getNbServer()) {
-                synchronized (monitor) {
-                    try {
-                        monitor.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+        this.createServer();
 
-                    }
-                    // Do only two task
-                    i++;
-                }
+        synchronized (monitor) {
+            try {
+                monitor.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+
             }
-
-            Thread.sleep(2000);
-
-            Channel channelBroadcastServer = connection.createChannel();
-            channelBroadcastServer.exchangeDeclare("INITMAP", "fanout");
-
-            System.out.println("[MANAGER] All server connected, sending map");
-
-            channelBroadcastServer.basicPublish("INITMAP", "", null, Communication.serialize(this.zoneList));
-
-            if(this.metaDataServer.getNbLocalSever() != 0) this.executor.shutdown();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
+
+        //Thread.sleep(2000);
+
+        Channel channelBroadcastServer = connection.createChannel();
+        channelBroadcastServer.exchangeDeclare("INITMAP", "fanout");
+
+        System.out.println("[MANAGER] All server connected, sending map");
+
+        channelBroadcastServer.basicPublish(RmqConfig.INITMAP_EXCHANGE, "", null, Communication.serialize(this.zoneList));
+
+        if(this.metaDataServer.getNbLocalSever() != 0) this.executor.shutdown();
     }
+}
+
 
     private void setServerZone(String serverQueueName){
         this.zoneList.get(this.zoneCounter).setServerQueueName(serverQueueName);
@@ -153,7 +145,10 @@ public class Manager {
      */
     private void digestServer() throws MapNotSetException {
         this.requireMap();
-        for(Zone zone : this.zoneList) this.metaDataServer.addServer(zone.getIp(),zone.getPort());
+        for(Zone zone : this.zoneList) {
+            this.metaDataServer.addServer(zone.getIp(),zone.getPort());
+        }
+        System.out.println("cc");
     }
 
     /**

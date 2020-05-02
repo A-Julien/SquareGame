@@ -106,6 +106,7 @@ public class Server extends Console implements Runnable, RmqConfig {
            System.exit(-1);
         }
         this.taskService = new TaskService(this.outChannel, this.sendBroadcastChanel, this.mapService, uniqueServeurQueue);
+
     }
 
     /**
@@ -146,7 +147,6 @@ public class Server extends Console implements Runnable, RmqConfig {
                 e.printStackTrace();
                 this.log("Problem during task");
             }
-          //  work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
         };
         this.incomingInstruction.basicConsume(this.uniqueServeurQueue, true, deliverCallback, consumerTag -> { });
     }

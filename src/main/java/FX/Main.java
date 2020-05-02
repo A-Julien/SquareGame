@@ -11,7 +11,7 @@ public class Main extends Application{
     private Manager manager;
 
     public void start(Stage primaryStage) {
-        manager = new Manager(10);
+        manager = new Manager(20);
         Screen screen = Screen.getPrimary();
         Rectangle2D ecran = screen.getVisualBounds();
 
