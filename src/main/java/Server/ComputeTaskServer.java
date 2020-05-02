@@ -50,11 +50,12 @@ public class ComputeTaskServer implements ServerReaction{
     public String playerWantedToMove(Task task) throws IOException {
         Task TaskToSend;
         String[] cmd = ((String)task.cmd).trim().split("\\s+");
-        PositionGrille posActuel = new PositionGrille(0,0);//MapComputer.getCoord(Replyqueue);
+        //MapComputer.getCoord(Replyqueue);
+        PositionGrille posActuel = new PositionGrille(0,0);
         PositionGrille cible = new PositionGrille(posActuel.getX() + Integer.parseInt(cmd[0]),
                 posActuel.getY() + Integer.parseInt(cmd[1]) );
         if (isInZone()) {
-            // if(MapManager.isFree(cible)){
+            // if(MapManager.isFree(PositionGrille p)){
              if(true){
                  // Swap Joeur Case X,Y
                  TaskToSend = new Task(TaskCommand.MOVE_GRANTED, new String(cible.getX() + " " + cible.getY()), null );

@@ -14,6 +14,11 @@ public class Task implements Serializable {
         this.replyQueu = replyQueu;
     }
 
+    @Override
+    public String toString() {
+        return cmdType.toString() + " : " + cmd + " from " + replyQueu;
+    }
+
     /*public String device;
     public int type; // 1 = MOVE; 2 = you Have A neihbgor ; 3 = Give Instruction to a client
     public String replyQueue;
