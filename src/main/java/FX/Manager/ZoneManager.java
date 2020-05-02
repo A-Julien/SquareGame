@@ -198,6 +198,15 @@ public class ZoneManager extends BorderPane {
      * build the map and launch manager
      */
     public void eventLaunch(){
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Initialisation");
+        alert.setHeaderText("Initialisation en cours");
+        alert.setContentText("En attente de connexion des serveurs");
+
+
+        alert.showAndWait();
+
         System.out.print("Build map");
         setTop(null);
         //toolBar = new ToolBar(print);

@@ -219,7 +219,7 @@ public class TaskService implements TaskServiceReaction {
 
         try {
             voisine = new Cell(c.getX()+1, c.getY());
-            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, null , queueClient);
+            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, voisine , queueClient);
             this.outChannel.basicPublish("",mapService.whoManageCell(voisine), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
@@ -228,7 +228,7 @@ public class TaskService implements TaskServiceReaction {
 
         try {
             voisine = new Cell(c.getX()-1, c.getY());
-            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, null , queueClient);
+            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, voisine , queueClient);
             this.outChannel.basicPublish("",mapService.whoManageCell(voisine), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
@@ -237,7 +237,7 @@ public class TaskService implements TaskServiceReaction {
 
         try {
             voisine = new Cell(c.getX(), c.getY()+1);
-            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, null , queueClient);
+            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, voisine , queueClient);
             this.outChannel.basicPublish("",mapService.whoManageCell(voisine), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
@@ -246,7 +246,7 @@ public class TaskService implements TaskServiceReaction {
 
         try {
             voisine = new Cell(c.getX()+1, c.getY()-1);
-            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, null , queueClient);
+            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, voisine , queueClient);
             this.outChannel.basicPublish("",mapService.whoManageCell(voisine), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
@@ -257,8 +257,12 @@ public class TaskService implements TaskServiceReaction {
     }
 
     @Override
-    public void mayNeighbor(Task task) {
-        //mapService.
+    public void mayNeighbor(Task task) throws IOException {
+        String client = mapService.isSomeOneWhere( (Cell) task.cmd);
+        if(client != null){
+            Task t = new Task(TaskCommand.PING, null , task.replyQueu);
+            this.outChannel.basicPublish("",client, null,  Communication.serialize(t));
+        }
     }
 
 

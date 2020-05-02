@@ -11,11 +11,16 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import javafx.event.EventHandler;
+import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -35,9 +40,12 @@ public class Client extends Scene implements RmqConfig {
     private static String queuServer;
     private static String myQueue;
 
+    Object monitor;
+
 
     public Client(double largeur, double hauteur) throws IOException, TimeoutException {
         super(new BorderPane(),  largeur,  hauteur);
+        monitor = new Object();
         borderPane = (BorderPane) this.getRoot();
 
         grid = new Grid(10,10,hauteur*0.9,largeur*0.9, false);
@@ -52,6 +60,7 @@ public class Client extends Scene implements RmqConfig {
             @Override
             public void handle(KeyEvent key) {
 
+                System.out.println(myQueue + key.getCode() + " : " + key.getTarget() + " ");
                 Deplacement dep;
 
                 Cell p = new Cell(0,0);
@@ -81,7 +90,12 @@ public class Client extends Scene implements RmqConfig {
 
             }
         };
-        this.addEventFilter(KeyEvent.KEY_PRESSED, clavier);
+
+
+        this.addEventFilter(KeyEvent.KEY_RELEASED, clavier);
+
+
+
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(RMQ_SERVER_IP);
@@ -96,8 +110,10 @@ public class Client extends Scene implements RmqConfig {
             try {
                 Task task = (Task) Communication.deserialize(delivery.getBody());
                 System.out.println(" [x] New Task there'" + task.toString() + "'");
-
-                switch (task.cmdType){
+         /*       synchronized (monitor){
+                    monitor.notify();
+                }
+         */       switch (task.cmdType){
                     case INIT:
                             queuServer = task.replyQueu;
                             this.pos = (Cell) task.cmd;
@@ -108,6 +124,11 @@ public class Client extends Scene implements RmqConfig {
                     case MOVE_GRANTED:
                         mouvement((Cell) task.cmd);
                     break;
+                    case PING:
+                        //Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        //alert.setContentText("Bonjour !");
+                        //alert.showAndWait();
+                        break;
                     case GET_COLOR:
 
 
@@ -160,6 +181,15 @@ public class Client extends Scene implements RmqConfig {
        // Cell to = new Cell(pos.getX() + mouvement.getX(), pos.getY()+mouvement.getY());
         Task TaskToSend = new Task(TaskCommand.MOVE,mouvement, myQueue);
         this.envoyerInformation.basicPublish("",queuServer, null, Communication.serialize(TaskToSend));
+     /*   synchronized(monitor) {
+            try {
+                monitor.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+*/
+
     }
 
     private void mouvement(Cell p){

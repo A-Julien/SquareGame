@@ -60,6 +60,8 @@ public class Grid extends Group {
 
     }
 
+
+
     public void afficherCases() {
         grille.getChildren().removeAll();
         for (int i = 0; i < x; i++) {
