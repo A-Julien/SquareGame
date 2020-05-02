@@ -12,16 +12,12 @@ public class LaunchClient extends Application{
     private Manager manager;
 
     public void start(Stage primaryStage) throws IOException, TimeoutException {
-
         Screen screen = Screen.getPrimary();
 
         primaryStage.setTitle("SquaregGame - Julien ALAIMO - Olivier HUREAU");
         primaryStage.show();
         Client client = new Client(400,400);
         primaryStage.setScene(client);
-
-        // primaryStage.setFullScreen(true);
-
     }
 
 

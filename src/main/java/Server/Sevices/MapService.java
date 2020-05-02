@@ -18,6 +18,15 @@ public class MapService {
         this.indexZone = this.getIndexZone(zoneID);
     }
 
+    /**
+     * Check if they are a client in the cell pass in param
+     *
+     * @param cell the cell to check
+     * @return return ClientQueue or null if no client in the cell
+     */
+    public String isSomeOneWhere(Cell cell){
+       return  (this.map.get(this.indexZone).find(cell)).getClientQueue();
+    }
 
     /**
      * Return the server zone color
