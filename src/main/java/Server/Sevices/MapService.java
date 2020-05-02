@@ -119,7 +119,7 @@ public class MapService {
      * @throws PositionError if position do not exit
      * @throws ClientActionError if the cell are not free
      */
-    public void moveClient(String clientQueue, Cell newPos) throws PositionError, ClientActionError {
+    public void moveClient(String clientQueue, Cell newPos) throws PositionError, ClientActionError, ClientNotFound {
         for (Cell cell : this.map.get(this.indexZone).getCells()){
             if(cell.equals(newPos)) {
                 if (cell.isOccupation()) throw new ClientActionError(
@@ -127,11 +127,12 @@ public class MapService {
                         clientQueue +
                         "to " + newPos.toString() +
                         "client " + cell.getClientQueue() + " already here");
-                cell.clientLeave();
+                (this.getPosClient(clientQueue)).clientLeave();
                 cell.setClient(clientQueue);
                 return;
             }
         }
+
         throw new ClientActionError(
                 "Cannot perform moving " +
                 clientQueue +
