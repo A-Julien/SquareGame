@@ -18,13 +18,27 @@ public class MapService {
     }
 
 
+    /***
+     *
+     * init client cell
+     *
+     * @param clientQueue
+     * @return
+     * @throws CellNotFound
+     */
+    public Cell initPositionClient(String clientQueue) throws CellNotFound {
+        Cell cell = this.getFreeCell();
+        cell.setClient(clientQueue);
+        return cell;
+    }
+
     /**
      * Return free cell if exist
      *
      * @return cell
      * @throws CellNotFound if exist no free cell
      */
-    public Cell getFreeCell() throws CellNotFound {
+    private Cell getFreeCell() throws CellNotFound {
         for (Cell cell : this.map.get(this.indexZone).getCells()) if(!cell.isOccupation()) return cell;
         throw new CellNotFound("Can not find free cell");
     }
