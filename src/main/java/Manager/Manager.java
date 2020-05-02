@@ -90,7 +90,7 @@ public class Manager {
 
             // Wait and be prepared to consume the message from RPC client.
             int i = 0;
-            while (i < this.metaDataServer.getNbLocalSever()) {
+            while (i < this.metaDataServer.getNbServer()) {
                 synchronized (monitor) {
                     try {
                         monitor.wait();
@@ -130,6 +130,7 @@ public class Manager {
      * @throws TimeoutException
      */
     private void createServer() throws IOException, TimeoutException {
+        if(this.metaDataServer.getNbLocalSever() == 0) return;
         System.out.println("[MANAGER] Launching local server");
         this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(this.nbThreads);
         for (int i = 1; i <= this.metaDataServer.getNbLocalSever(); i++){

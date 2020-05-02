@@ -20,6 +20,10 @@ public class MetaDataServer {
         return nbLocalSever;
     }
 
+    public int getNbServer(){
+        return this.serverListInfo.size();
+    }
+
     public HashMap<String, String> getServerListInfo() {
         return serverListInfo;
     }

@@ -104,7 +104,7 @@ public class Server extends Console implements Runnable, RmqConfig {
         } catch (ZoneNotFound zoneNotFound) {
            this.log("Error while MapService start : " + zoneNotFound.toString());
         }
-        this.taskService = new TaskService(this.outChannel, this.sendBroadcastChanel, this.map, uniqueServeurQueue);
+        this.taskService = new TaskService(this.outChannel, this.sendBroadcastChanel, this.mapService, uniqueServeurQueue);
     }
 
     /**
