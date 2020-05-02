@@ -52,7 +52,9 @@ public class Cell implements Serializable {
             this.clientQueue = null;
             return;
         }
-        throw new PositionError("No client in this position");
+        throw new PositionError(
+                "Try to remove client at postion " + this.toString() +
+                " but no client in this position");
     }
 
     public void setClient(String clientQueue) {

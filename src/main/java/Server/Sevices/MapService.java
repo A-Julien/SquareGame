@@ -80,12 +80,12 @@ public class MapService {
         for (Cell cell : this.map.get(this.indexZone).getCells()) if (cell.equals(pos)) return cell.isOccupation();
 
         throw new PositionNotFound(
-                "Can't find cell position " +
+                "Position " +
                 pos.toString() +
                 " in (zone: " +
                 this.map.get(this.indexZone).getNomZone() +
                 " of id: "+
-                this.map.get(this.indexZone).getId() + ")");
+                this.map.get(this.indexZone).getId() + ") not free");
     }
 
 
@@ -105,7 +105,6 @@ public class MapService {
                 " of id: "+
                 this.map.get(this.indexZone).getId() + ")");
     }
-
 
     /**
      * Move client in a other position.
@@ -138,6 +137,30 @@ public class MapService {
                 newPos.toString());
     }
 
+    /**
+     * Remove a client of a cell
+     * This method are used when client move in a other server
+     *
+     * @param clientQueue the client queue
+     * @throws ClientNotFound verify if the client exist
+     * @throws PositionError verify if position exist
+     */
+    public void cleanCell(String clientQueue) throws ClientNotFound, PositionError {
+        (this.getPosClient(clientQueue)).clientLeave();
+    }
+
+    /**
+     * Add a client to a cell
+     * This method are used when a client migrate from a other server
+     *
+     * @param clientQueue the new client queue
+     * @param newCell the target cell
+     * @throws PositionNotFound verify if the target position exist
+     */
+    public void setNewClient(String clientQueue, Cell newCell) throws PositionNotFound {
+        this.isPosFree(newCell);
+        (this.map.get(this.indexZone).find(newCell)).setClient(clientQueue);
+    }
 
     /**
      * internal method
