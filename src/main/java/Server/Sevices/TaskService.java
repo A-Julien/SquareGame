@@ -238,15 +238,11 @@ public class TaskService implements ServerReaction {
     }
 
     @Override
-    public void ayNeighbor(Task task) {
+    public void mayNeighbor(Task task) {
         //mapService.
     }
 
 
-    @Override
-    public void forwardMessage() {
-
-    }
 
     @Override
     public String print() {

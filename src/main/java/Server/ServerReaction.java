@@ -10,6 +10,6 @@ public interface ServerReaction {
     void computeFowardedTask(Task task) throws PositionNotFound, IOException;
     void checkForNeighbor(Cell c, String queueClient);
 
-    void  ayNeighbor(Task task);
+    void  mayNeighbor(Task task);
     String print();
 }
