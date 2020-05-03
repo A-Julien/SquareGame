@@ -19,7 +19,7 @@ public class Console extends Scene  {
     public Console() {
         super(new ScrollPane(), 400, 400);
         this.scrollPane = (ScrollPane) this.getRoot();
-        scrollPane.prefWidth(800);
+        scrollPane.prefWidth(650);
         //scrollPane.prefHeight(400);
         scrollPane.minHeight(200);
         shortDateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
