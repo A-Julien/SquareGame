@@ -2,13 +2,12 @@ package Launcher;
 
 import FX.Manager.MenuSelectionZone;
 import Manager.Manager;
+import javafx.application.Application;
 import javafx.geometry.Rectangle2D;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import static javafx.application.Application.launch;
-
-public class LaunchManager {
+public class LaunchManager extends Application {
     private Manager manager;
 
     public void start(Stage primaryStage) {

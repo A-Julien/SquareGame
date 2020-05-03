@@ -6,6 +6,7 @@ import Task.TaskCommand;
 import Utils.Direction;
 
 import Utils.Communication;
+import Utils.SimpleLogger;
 import com.rabbitmq.client.Channel;
 
 import java.io.IOException;
@@ -14,15 +15,16 @@ import Exception.*;
 
 public class TaskService implements TaskServiceReaction {
     private Channel outChannel;
-    private Channel sendBroadcastChanel;
     private MapService mapService;
     private String myReponsseQueue;
+    private SimpleLogger logger;
 
-    public TaskService(Channel outChannel, Channel sendBroadcastChanel, MapService mapService, String myResponsseQueue) {
+    public TaskService(Channel outChannel, MapService mapService, String myResponsseQueue,SimpleLogger logger) {
         this.outChannel = outChannel;
-        this.sendBroadcastChanel = sendBroadcastChanel;
         this.mapService = mapService;
         this.myReponsseQueue = myResponsseQueue;
+        this.logger = logger;
+        this.logger.addTag("TASK_SERVICE");
     }
 
     public String compute(Task task) throws IOException, UnknownCmd {
@@ -94,7 +96,7 @@ public class TaskService implements TaskServiceReaction {
 
         try{
             // Retrieve client position
-            System.out.println(task.replyQueu);
+            this.logger.log(task.replyQueu);
             Cell actualPosition = this.mapService.getPosClient(task.replyQueu);
             int dX = 0;
             int dY = 0;
@@ -141,13 +143,13 @@ public class TaskService implements TaskServiceReaction {
                 this.outChannel.basicPublish("",queueServerHandlingCible, null, Communication.serialize(taskToSend));
 
             } catch (ZoneNotFound zoneNotFound) {
-                System.out.println("Error : Cell out of bounds");
+                this.logger.log("Error : Cell out of bounds");
                 taskToSend = new Task(TaskCommand.MOVE_NOT_GRANTED, task, myReponsseQueue );
                 this.outChannel.basicPublish("",task.replyQueu, null, Communication.serialize(taskToSend));
             }
 
         } catch ( ClientNotFound err){
-            System.out.println("Error : " + err.toString());
+            this.logger.log("Error : " + err.toString());
             taskToSend = new Task(TaskCommand.CLIENT_NOT_FOUNDED, null , null);
              this.outChannel.basicPublish("",task.replyQueu, null, Communication.serialize(taskToSend));
         }
@@ -205,7 +207,7 @@ public class TaskService implements TaskServiceReaction {
                 this.outChannel.basicPublish("",mapService.whoManageCell(neighbour), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
-            System.out.println("Cell out of bounds");
+            this.logger.log("Cell out of bounds");
         }
 
         try {
@@ -215,7 +217,7 @@ public class TaskService implements TaskServiceReaction {
                 this.outChannel.basicPublish("",mapService.whoManageCell(neighbour), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
-            System.out.println("Cell out of bounds");
+            this.logger.log("Cell out of bounds");
         }
 
         try {
@@ -225,7 +227,7 @@ public class TaskService implements TaskServiceReaction {
                 this.outChannel.basicPublish("",mapService.whoManageCell(neighbour), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
-            System.out.println("Cell out of bounds");
+            this.logger.log("Cell out of bounds");
         }
 
         try {
@@ -235,7 +237,7 @@ public class TaskService implements TaskServiceReaction {
                 this.outChannel.basicPublish("",mapService.whoManageCell(neighbour), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
-            System.out.println("Cell out of bounds");
+            this.logger.log("Cell out of bounds");
         }
 
 

@@ -7,6 +7,7 @@ import Server.RmqCom.ConnectionManger;
 import Server.Sevices.MapService;
 import Server.Sevices.TaskService;
 import Utils.Communication;
+import Utils.SimpleLogger;
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
@@ -20,12 +21,12 @@ import java.util.concurrent.TimeoutException;
 import Task.*;
 
 
-public class Server extends Console implements Runnable, RmqConfig {
+public class Server implements Runnable, RmqConfig {
+    private static int ServerID;
     private String SERVER_NAME;
     private String RPC_INIT_QUEUE_NAME;
     private Connection connection;
     private Channel newClientChanel;
-    private Channel sendBroadcastChanel;
 
     private List<Zone> map;
 
@@ -42,20 +43,22 @@ public class Server extends Console implements Runnable, RmqConfig {
 
     private TaskService taskService;
     private MapService mapService;
+    private SimpleLogger logger;
 
 
 
-    public Server(String RPC_INIT_QUEUE_NAME, String RMQ_HOST, String SERVER_NAME) throws IOException, TimeoutException {
-        super();
-        this.SERVER_NAME = SERVER_NAME;
+    public Server(String RPC_INIT_QUEUE_NAME, String RMQ_HOST) {
+        this.SERVER_NAME = RMQ_BASIC_SERVER_NAME + ServerID++;
         this.RPC_INIT_QUEUE_NAME = RPC_INIT_QUEUE_NAME;
         this.RMQ_HOST = RMQ_HOST;
+        this.logger = new SimpleLogger(this.SERVER_NAME);
+
     }
 
     @Override
     public void run() {
         try {
-            this.log("status : " + this.SERVER_NAME + " up");
+            this.logger.log("status : " + this.SERVER_NAME + " up");
             this.initCommunication();
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
@@ -75,14 +78,13 @@ public class Server extends Console implements Runnable, RmqConfig {
         try{
             this.connection = factory.newConnection();
         } catch ( Exception e ) {
-            this.log("Connection Failed");
+            this.logger.log("Connection Failed");
             java.lang.System.exit(-1);
         }
 
         this.initClientCallbackInstruction();
         this.initWaitForNewClient();
         this.initConnectionInitMap();
-        this.initBroadcastServerMessaging();
         this.initConnectionRPC();
         this.waitForAllServersReady();
     }
@@ -97,10 +99,10 @@ public class Server extends Console implements Runnable, RmqConfig {
         try {
             this.mapService = new MapService(this.map, this.serverZone);
         } catch (ZoneNotFound zoneNotFound) {
-           this.log("Error while MapService start : " + zoneNotFound.toString());
+           this.logger.log("Error while MapService start : " + zoneNotFound.toString());
            System.exit(-1);
         }
-        this.taskService = new TaskService(outChannel, this.sendBroadcastChanel, this.mapService, uniqueServeurQueue);
+        this.taskService = new TaskService(outChannel, this.mapService, uniqueServeurQueue, this.logger);
 
     }
 
@@ -109,10 +111,10 @@ public class Server extends Console implements Runnable, RmqConfig {
      */
     private void initConnectionRPC(){
         try {
-            this.log("Requesting Initialisation from manager");
-            this.log("Getting data from manager");
+            this.logger.log("Requesting Initialisation from manager");
+            this.logger.log("Getting data from manager");
             this.serverZone = ConnectionManger.init(this.connection, this.RPC_INIT_QUEUE_NAME, this.uniqueServeurQueue);
-            this.log("Connection fully establish");
+            this.logger.log("Connection fully establish");
         } catch (IOException | InterruptedException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -127,17 +129,17 @@ public class Server extends Console implements Runnable, RmqConfig {
         Channel incomingInstruction = connection.createChannel();
         this.uniqueServeurQueue =  incomingInstruction.queueDeclare("", true, false, false, null).getQueue();
         incomingInstruction.basicQos(1);
-        this.log("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
+        this.logger.log("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
 
             try {
                 Task task = (Task) Communication.deserialize(delivery.getBody());
-                this.log(" [x] New Task there'" + task.toString() + "'");
+                this.logger.log(" [x] New Task there'" + task.toString() + "'");
                 taskService.compute(task);
             } catch (ClassNotFoundException | UnknownCmd e) {
                 e.printStackTrace();
-                this.log("Problem during task");
+                this.logger.log("Problem during task");
             }
         };
         incomingInstruction.basicConsume(this.uniqueServeurQueue, true, deliverCallback, consumerTag -> { });
@@ -172,8 +174,8 @@ public class Server extends Console implements Runnable, RmqConfig {
             }
 
 
-            this.log("New client there ");
-            this.log("try to find place for client");
+            this.logger.log("New client there ");
+            this.logger.log("try to find place for client");
 
 
             try {
@@ -190,36 +192,6 @@ public class Server extends Console implements Runnable, RmqConfig {
     }
 
 
-    /**
-     * Initialize Broadcast connection with all Server
-     *
-     *
-     * @throws IOException
-     * @throws TimeoutException
-     */
-    private void initBroadcastServerMessaging() throws IOException, TimeoutException {
-        this.sendBroadcastChanel = connection.createChannel();
-        this.sendBroadcastChanel.exchangeDeclare(BROADCAST_EXCHANGE, "fanout");
-
-        Channel recievedBroadcastChanel = connection.createChannel();
-        recievedBroadcastChanel.exchangeDeclare(BROADCAST_EXCHANGE, "fanout");
-        String BROADCAST_QUEUE = recievedBroadcastChanel.queueDeclare().getQueue();
-        recievedBroadcastChanel.queueBind(BROADCAST_QUEUE, BROADCAST_EXCHANGE, "");
-
-        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            try {
-                TaskService t = (TaskService) Communication.deserialize(delivery.getBody());
-                this.log(" [x] New Task there'" + t.toString() + "'");
-                //this.log(t.compute(work,broadcast));
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-                this.log("Problem during BROADCAST");
-            }
-        };
-
-        recievedBroadcastChanel.basicConsume(BROADCAST_QUEUE, true, deliverCallback, consumerTag -> { });
-
-    }
 
     /**
      * Wait for download game map
@@ -228,7 +200,6 @@ public class Server extends Console implements Runnable, RmqConfig {
      * @throws TimeoutException
      */
     private void initConnectionInitMap() throws IOException {
-
         Channel initMap = connection.createChannel();
         initMap.exchangeDeclare(INITMAP_EXCHANGE, "fanout");
         String queueName = initMap.queueDeclare().getQueue();
@@ -237,7 +208,7 @@ public class Server extends Console implements Runnable, RmqConfig {
         monitor = new Object();
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            this.log("Received map from manager");
+            this.logger.log("Received map from manager");
             try {
                 this.map = (ArrayList<Zone>) Communication.deserialize(delivery.getBody());
                 this.initServices();
@@ -267,8 +238,5 @@ public class Server extends Console implements Runnable, RmqConfig {
         }
     }
 
-    private void log(String message){
-        System.out.println("[" + this.SERVER_NAME + "] " + message);
-    }
 
 }

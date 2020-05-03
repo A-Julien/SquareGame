@@ -7,6 +7,7 @@ import Utils.Direction;
 import Task.Task;
 import Task.TaskCommand;
 import Utils.Communication;
+import Utils.SimpleLogger;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -27,9 +28,13 @@ public class ClientService  implements ClientReaction{
 
     private static final Object monitor = new Object();
     private ClientFX clientFX;
+    
+    private SimpleLogger logger;
 
     public ClientService(ClientFX clientFX) throws IOException, TimeoutException {
         this.clientFX = clientFX;
+        this.logger = new SimpleLogger("CLIENT");
+        this.logger.addTag("SERVICE");
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(RMQ_SERVER_IP);
@@ -54,7 +59,7 @@ public class ClientService  implements ClientReaction{
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             try {
                 Task task = (Task) Communication.deserialize(delivery.getBody());
-                System.out.println(" [x] New Task there'" + task.toString() + "'");
+                this.logger.log(" [x] New Task there'" + task.toString() + "'");
                 synchronized (monitor){
                     monitor.notify();
                 }
@@ -63,17 +68,17 @@ public class ClientService  implements ClientReaction{
                         queuServer = task.replyQueu;
                         this.clientFX.setPosCircle(((Cell) task.cmd).getX(), ((Cell) task.cmd).getY());
                         this.requestServerColor();
-                        System.out.println("On m'as assigné la position" + ((Cell) task.cmd));
+                        this.logger.log("Server give me a position " + ((Cell) task.cmd));
                         break;
                     case MOVE_GRANTED:
                         this.clientFX.moveCircle((Cell) task.cmd);
                         break;
                     case PING:
-                        System.out.println("BONJOUR WESH");
+                        this.logger.log("BONJOUR WESH");
                         this.reactToPing(task);
                         break;
                     case PONG:
-                        System.out.println("BONJOUR MA GUEULE");
+                        this.logger.log("BONJOUR MA GUEULE");
                         this.reactToPong();
                         break;
                     case GET_COLOR:
@@ -90,7 +95,7 @@ public class ClientService  implements ClientReaction{
 
             } catch (ClassNotFoundException  e) {
                 e.printStackTrace();
-                System.out.println("Problem during task");
+                this.logger.log("Problem during task");
             }
 
         };
@@ -114,7 +119,7 @@ public class ClientService  implements ClientReaction{
      * @throws IOException
      */
     public void handleMovement(Direction movement) throws IOException {
-        System.out.println("Déplacement souhaité : " + movement);
+        this.logger.log("Ask server for move " + movement);
         Task TaskToSend = new Task(TaskCommand.MOVE,movement, clientQueue);
         this.sendChanel.basicPublish("",queuServer, null, Communication.serialize(TaskToSend));
         synchronized(monitor) {
@@ -148,15 +153,14 @@ public class ClientService  implements ClientReaction{
         this.clientFX.showAlert1();
     }
 
+    /**
+     * react to a client ping
+     */
     @Override
     public void reactToPing(Task task) throws IOException {
-        this.clientFX.showAlert1();
+        this.clientFX.showAlert2();
         Task t = new Task(TaskCommand.PONG, null, null);
         sendChanel.basicPublish("", task.replyQueu, null, Communication.serialize(t));
     }
 
-    @Override
-    public void handleMouvement(Direction mouvement) {
-
-    }
 }

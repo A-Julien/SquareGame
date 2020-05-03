@@ -9,6 +9,6 @@ public interface ClientReaction {
      void reactToPong();
      void reactToPing(Task task) throws IOException;
      void changeColor(Task task);
-     void handleMouvement(Direction mouvement);
+     void handleMovement(Direction movement) throws IOException;
 }
 
