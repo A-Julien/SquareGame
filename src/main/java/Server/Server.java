@@ -69,6 +69,7 @@ public class Server implements Runnable, RmqConfig {
     private void initCommunication() throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(this.RMQ_HOST);
+
         try{
             this.connection = factory.newConnection();
         } catch ( Exception e ) {

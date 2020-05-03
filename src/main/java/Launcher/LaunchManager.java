@@ -9,9 +9,11 @@ import javafx.stage.Stage;
 
 public class LaunchManager extends Application {
     private Manager manager;
+    private static String ip = null;
 
     public void start(Stage primaryStage) {
-        manager = new Manager(20);
+        if(ip == null)  manager = new Manager(20);
+        if(ip != null) manager = new Manager(ip,20);
         Screen screen = Screen.getPrimary();
         Rectangle2D ecran = screen.getVisualBounds();
 
@@ -27,6 +29,7 @@ public class LaunchManager extends Application {
 
 
     public static void main(String[] args) {
+        ip = args[0];
         launch(args);
     }
 }

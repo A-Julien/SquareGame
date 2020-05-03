@@ -43,7 +43,7 @@ public class ClientFX extends Scene implements RmqConfig {
      * @throws IOException
      * @throws TimeoutException
      */
-    public ClientFX(double width, double height) throws IOException, TimeoutException {
+    public ClientFX(double width, double height, String RMQ_IP) throws IOException, TimeoutException {
         super(new BorderPane(),  width,  height);
         this.console = new Console();
         this.logger = new SimpleLogger("CLIENT", this.console);
@@ -103,7 +103,7 @@ public class ClientFX extends Scene implements RmqConfig {
 
         this.addEventFilter(KeyEvent.KEY_RELEASED, clavier);
         this.grid.affCircle();
-        this.clientService = new ClientService(this);
+        this.clientService = new ClientService(this, RMQ_IP);
         clientService.setConsole(console);
 
     }
