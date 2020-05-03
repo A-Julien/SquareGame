@@ -1,4 +1,4 @@
-package Class;
+package FX.Manager;
 
 public interface Mouvement {
 

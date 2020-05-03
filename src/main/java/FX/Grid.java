@@ -1,9 +1,8 @@
 package FX;
-import Class.*;
+import Manager.Map.ZoneFx;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.control.Alert;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -11,10 +10,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
 
 import java.awt.Point;
-import java.util.ArrayList;
 
 public class Grid extends Group {
-    Case[][] cases;
+    public Case[][] cases;
     private Group zoneSelection= new Group();
     private Group grille = new Group();
     private Rectangle zone = new Rectangle();
@@ -30,15 +28,17 @@ public class Grid extends Group {
 
     private Circle player;
 
+    private boolean manager;
 
 
-    Grid(int nbCaseHauteur, int nbCaseLargeur, double hauteurPX, double largeurPx) {
+    Grid(int nbCaseHauteur, int nbCaseLargeur, double hauteurPX, double largeurPx, boolean manager) {
         this.x = nbCaseLargeur;
         this.y = nbCaseHauteur;
         this.largeurCase = largeurPx / nbCaseLargeur;
         //this.largeurCase = this.compute / nbCaseHauteur
         this.hauteurCase = hauteurPX / nbCaseHauteur;
        // this.hauteurCase = maxHeight() / nbCaseHauteur;
+        this.manager = manager;
 
 
 
@@ -47,7 +47,10 @@ public class Grid extends Group {
         this.getChildren().addAll(zoneSelection,grille);
         afficherCases();
         grille.setOpacity(0.5);
-        zoneSelection.getChildren().add(zone);
+        if(manager){
+            zoneSelection.getChildren().add(zone);
+        }
+
 
         player = new Circle();
         player.setCenterX(hauteurCase/2);
@@ -56,6 +59,8 @@ public class Grid extends Group {
 
 
     }
+
+
 
     public void afficherCases() {
         grille.getChildren().removeAll();
@@ -111,7 +116,6 @@ public class Grid extends Group {
     };
 
     EventHandler<MouseEvent> handlerEND = new EventHandler<MouseEvent>() {
-
         @Override
         public void handle(MouseEvent event) {
             //System.out.println("Finis");
@@ -233,10 +237,13 @@ public class Grid extends Group {
 
             }
         }
-        handlerSelection();
+        if(this.manager){
+            handlerSelection();
+        }
+
     }
 
-    protected void rmHandlerSelection(){
+    public void rmHandlerSelection(){
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 cases[i][j].setOnMouseClicked(handlerShowInfoCell);
@@ -274,5 +281,7 @@ public class Grid extends Group {
    public void setColorCircle(Color c){
        player.setFill(c);
    }
+
+
 
 }

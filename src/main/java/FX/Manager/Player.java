@@ -1,4 +1,4 @@
-package Class;
+package FX.Manager;
 
 import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;

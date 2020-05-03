@@ -1,21 +1,22 @@
-package Class;
+package Manager.Map;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
 
-public class ZoneFx extends Zone{
+public class ZoneFx extends Zone {
+    private static int compteur_id = 0;
     public ColorPicker colorPicker;
     EventHandler<ActionEvent> eventColorPicker;
 
     public ZoneFx(String nom, Color color){
-        super(nom, color);
+        super(nom);
         this.colorPicker = new ColorPicker();
         colorPicker.setValue(color);
-        positionGrille = new ArrayList<>();
+        this.id = compteur_id;
+        compteur_id++;
     }
 
     public ColorPicker getColorPicker() {
@@ -26,7 +27,7 @@ public class ZoneFx extends Zone{
         this.colorPicker = colorPicker;
     }
 
-    public Color getColor(){
+    public Color getZoneColor(){
         return colorPicker.getValue();
     }
 

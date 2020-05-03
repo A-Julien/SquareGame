@@ -1,7 +1,11 @@
-package FX;
-import Class.*;
+package FX.Manager;
 
+import FX.Case;
+import FX.Grid;
+import Manager.Map.Cell;
+import Manager.Map.ZoneFx;
 import Manager.Manager;
+import Manager.Map.Zone;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -31,7 +35,7 @@ public class ZoneManager extends BorderPane {
 
     private Manager manager;
 
-    ZoneManager(Grid grid, Manager manager) {
+    public ZoneManager(Grid grid, Manager manager) {
         super();
 
         this.manager = manager;
@@ -185,17 +189,24 @@ public class ZoneManager extends BorderPane {
         }
     }
 
-    protected Button getLaunchButton(){
+    public Button getLaunchButton(){
         return launch;
     }
 
     /**
      * Button start trigger
      * build the map and launch manager
-     *
-     * Quick and very Dirty sorry
      */
-    void eventLaunch(){
+    public void eventLaunch(){
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Initialisation");
+        alert.setHeaderText("Initialisation en cours");
+        alert.setContentText("En attente de connexion des serveurs");
+
+
+        alert.showAndWait();
+
         System.out.print("Build map");
         setTop(null);
         //toolBar = new ToolBar(print);
@@ -205,27 +216,32 @@ public class ZoneManager extends BorderPane {
 
 
         ArrayList<Zone> finalZone = new ArrayList();
-        Zone z = null;
         boolean find = false;
+        Zone z = null;
         for(int i = 0; i < grid.getX(); i++){
             for(int j = 0; j < grid.getY(); j++){
                 int index = -1;
                 find = false;
                 for (Zone zone: finalZone) {
-                    if (grid.cases[i][j].getZ().nomZone.equals(zone.nomZone)) {
+                    if (zone.getId() == grid.cases[i][j].getZ().getId()) { //TODO HUM... PB.. getid()
                         find  = true;
                         index++;
                         break;
                     }
                     index++;
                 }
-
                 if(!find){
                     z = new Zone(grid.cases[i][j].getZ());
-                    z.addCell(new PositionGrille(i, j));
+                    z.addCell(new Cell(i, j));
+                    z.setColor(
+                            (grid.cases[i][j].getZ()).getZoneColor().getRed(),
+                            (grid.cases[i][j].getZ()).getZoneColor().getGreen(),
+                            (grid.cases[i][j].getZ()).getZoneColor().getBlue()
+                    );
+
                     finalZone.add(z);
                 } else {
-                    finalZone.get(index).addCell(new PositionGrille(i, j));
+                    finalZone.get(index).addCell(new Cell(i, j));
                 }
             }
             System.out.print(".");
@@ -238,12 +254,11 @@ public class ZoneManager extends BorderPane {
         for(Zone zone : finalZone){
             System.out.println(zone.toString());
         }
-
+        refreshTable();
         try {
             this.manager.run();
         } catch (ServerNotSetException | TimeoutException | MapNotSetException | IOException e) {
             System.out.println("Manager error while starting : " + e.toString());
         }
-        refreshTable();
     }
 }

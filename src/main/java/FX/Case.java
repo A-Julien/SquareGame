@@ -1,6 +1,5 @@
 package FX;
-import Class.ZoneFx;
-import javafx.scene.Group;
+import Manager.Map.ZoneFx;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeType;
@@ -38,7 +37,7 @@ public class Case extends Rectangle {
 
     public void setZone(ZoneFx zone){
         this.z = zone;
-        changerCouleur(z.getColor());
+        changerCouleur(z.getZoneColor());
     }
 
     public void removeZone(){
@@ -52,7 +51,7 @@ public class Case extends Rectangle {
 
     public void setZ(ZoneFx z) {
         this.z = z;
-        changerCouleur(z.getColor());
+        changerCouleur(z.getZoneColor());
     }
     @Override
     public String toString() {

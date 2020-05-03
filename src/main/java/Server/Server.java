@@ -1,132 +1,253 @@
 package Server;
-import Class.InformationsServeur;
+import Configuration.RmqConfig;
+import FX.Console;
 
+import Server.Sevices.MapService;
+import Server.Sevices.TaskService;
 import Utils.Communication;
 import com.rabbitmq.client.*;
 
 import java.io.IOException;
-import Class.Zone;
+import Manager.Map.Zone;
+
+import Exception.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import Task.*;
 
-public class Server implements Runnable {
+
+public class Server extends Console implements Runnable, RmqConfig {
     private String SERVER_NAME;
-    private String RPC_INI_QUEUE_NAME;
+    private String BROADCAST_QUEUE;
+    private String RPC_INIT_QUEUE_NAME;
     private ConnectionFactory factory;
     private Connection connection;
-    private Channel information;
-    private Channel broadcast;
+    private Channel newClientChanel;
+    private Channel recievedBroadcastChanel;
+    private Channel initMap;
+    private Channel sendBroadcastChanel;
+    private Channel outChannel;
+
 //    private Channel newClient;
-    private Channel work;
+    private Channel incomingInstruction;
     private List<Zone> map;
 
     // Propre à chaque serveur
     private String uniqueServeurQueue;
 
 
-    private InformationsServeur informationsServeur;
+    private Integer serverZone;
     private Object monitor;
 
     private Object soloClient;
 
-    final String TASK_QUEUE_NAME = "task_queue";
-    private final String POOL_CLIENT_QUEUE = "new_client";
     private  String RMQ_HOST;
-
+    private Console console;
 
     boolean initOk = false;
 
+    private TaskService taskService;
+    private MapService mapService;
 
 
-    public Server(String RPC_INI_QUEUE_NAME, String RMQ_HOST, String SERVER_NAME) throws IOException, TimeoutException {
+
+    public Server(String RPC_INIT_QUEUE_NAME, String RMQ_HOST, String SERVER_NAME) throws IOException, TimeoutException {
+        super();
         this.SERVER_NAME = SERVER_NAME;
-        this.RPC_INI_QUEUE_NAME = RPC_INI_QUEUE_NAME;
+        this.RPC_INIT_QUEUE_NAME = RPC_INIT_QUEUE_NAME;
         this.RMQ_HOST = RMQ_HOST;
-       // connection.close();
     }
 
     @Override
     public void run() {
         try {
             this.log("status : " + this.SERVER_NAME + " up");
-            this.initConnection();
+            this.initCommunication();
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
         }
     }
 
-    private void initQueuCommunication() throws IOException{
-        work = connection.createChannel();
-        uniqueServeurQueue = work.queueDeclare().getQueue();
-        this.log("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
-        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
-            String message = new String(delivery.getBody(), "UTF-8");
+    /**
+     *
+     * Initialize all services and connection
+     *
+     * @throws IOException
+     * @throws TimeoutException
+     */
+    private void initCommunication() throws IOException, TimeoutException {
+        this.factory = new ConnectionFactory();
+        this.factory.setHost(this.RMQ_HOST);
+        try{
+            this.connection = factory.newConnection();
+        } catch ( Exception e ) {
+            this.log("Connection Failed");
+            java.lang.System.exit(-1);
+        }
 
-            System.out.println("[x] Client talk to me '" + message + "'");
-            try {
-                Thread.sleep(1000);
-                //doWork(message);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                work.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-            }
-        };
-        work.basicConsume(uniqueServeurQueue, false, deliverCallback, consumerTag -> { });
+        this.initClientCallbackInstruction();
+        this.initWaitForNewClient();
+        this.initConnectionInitMap();
+        this.initBroadcastServerMessaging();
+        this.initConnectionRPC();
+        this.waitForAllServersReady();
 
 
     }
-    private void initCommunicationClient() throws IOException, TimeoutException{
-        information = connection.createChannel();
-        information.queueDeclare(POOL_CLIENT_QUEUE, false, false, false, null);
-        information.queuePurge(POOL_CLIENT_QUEUE);
 
-        information.basicQos(1);
+    private void initServices() throws IOException {
+        this.outChannel = this.connection.createChannel();
+        try {
+            this.mapService = new MapService(this.map, this.serverZone);
+        } catch (ZoneNotFound zoneNotFound) {
+           this.log("Error while MapService start : " + zoneNotFound.toString());
+           System.exit(-1);
+        }
+        this.taskService = new TaskService(this.outChannel, this.sendBroadcastChanel, this.mapService, uniqueServeurQueue);
 
-        soloClient = new Object();
+    }
+
+    /**
+     * Initialize connection to the manager
+     */
+    private void initConnectionRPC(){
+        try (ManagerConnection rpcInit = new ManagerConnection(this.connection, this.RPC_INIT_QUEUE_NAME, this.uniqueServeurQueue)) {
+            this.log("Requesting Initialisation from manager");
+            this.log("Getting data from manager");
+            this.serverZone = rpcInit.call();
+            this.log("Connection fully establish");
+        } catch (IOException | InterruptedException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Wait instruction from client
+     *
+     * @throws IOException
+     */
+    private void initClientCallbackInstruction() throws IOException{
+        this.incomingInstruction = connection.createChannel();
+        this.uniqueServeurQueue =  incomingInstruction.queueDeclare("", true, false, false, null).getQueue();
+        incomingInstruction.basicQos(1);
+        this.log("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+
+
+            try {
+
+                Task task = (Task) Communication.deserialize(delivery.getBody());
+                this.log(" [x] New Task there'" + task.toString() + "'");
+                taskService.compute(task);
+
+
+            } catch (ClassNotFoundException | UnknownCmd e) {
+                e.printStackTrace();
+                this.log("Problem during task");
+            }
+        };
+        this.incomingInstruction.basicConsume(this.uniqueServeurQueue, true, deliverCallback, consumerTag -> { });
+    }
+
+    /**
+     * Wait for new Client
+     *
+     * @throws IOException
+     * @throws TimeoutException
+     */
+    private void initWaitForNewClient() throws IOException, TimeoutException{
+        this.newClientChanel = connection.createChannel();
+        this.newClientChanel.queueDeclare(POOL_CLIENT_QUEUE, false, false, false, null);
+        this.newClientChanel.queuePurge(POOL_CLIENT_QUEUE);
+
+        this.newClientChanel.basicQos(1);
+
+
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             AMQP.BasicProperties replyProps = new AMQP.BasicProperties
                     .Builder()
                     .correlationId(delivery.getProperties().getCorrelationId())
                     .build();
 
-            String response = "";
 
-
-            System.out.println("New client there");
-            information.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, uniqueServeurQueue.getBytes("UTF-8"));
-            information.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
-            // RabbitMq consumer worker thread notifies the RPC server owner thread
-            synchronized (soloClient) {
-                soloClient.notify();
+            Task task = null;
+            try {
+                task = (Task) Communication.deserialize(delivery.getBody());
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
+
+
+            this.log("New client there ");
+            this.log("try to find place for client");
+
+
+            try {
+                this.newClientChanel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);   //si place dans la map
+
+                Task taskSend = new Task(TaskCommand.INIT,  mapService.initPositionClient(task.replyQueu), uniqueServeurQueue);
+
+                this.newClientChanel.basicPublish("", task.replyQueu, replyProps, Communication.serialize(taskSend));
+
+
+            } catch (CellNotFound e){
+                this.newClientChanel.basicNack(delivery.getEnvelope().getDeliveryTag(), true, true);   //si pas place
+            }
+
+
+
 
 
         };
 
-        information.basicConsume(POOL_CLIENT_QUEUE, false, deliverCallback, (consumerTag -> { }));
+        newClientChanel.basicConsume(POOL_CLIENT_QUEUE, false, deliverCallback, (consumerTag -> { }));
     }
 
-    private void initConnection() throws IOException, TimeoutException {
-        this.factory = new ConnectionFactory();
-        this.factory.setHost(this.RMQ_HOST);
-        this.connection = factory.newConnection();
-        this.initQueuCommunication();
-        this.initCommunicationClient();
-        this.initConnectionFANOUT();
-        this.initConnectionRPC();
-        this.waitForAllServersReady();
+
+    /**
+     * Initialize Broadcast connection with all Server
+     *
+     *
+     * @throws IOException
+     * @throws TimeoutException
+     */
+    private void initBroadcastServerMessaging() throws IOException, TimeoutException {
+        this.sendBroadcastChanel = connection.createChannel();
+        this.sendBroadcastChanel.exchangeDeclare(BROADCAST_EXCHANGE, "fanout");
+
+        this.recievedBroadcastChanel = connection.createChannel();
+        this.recievedBroadcastChanel.exchangeDeclare(BROADCAST_EXCHANGE, "fanout");
+        this.BROADCAST_QUEUE = recievedBroadcastChanel.queueDeclare().getQueue();
+        this.recievedBroadcastChanel.queueBind(BROADCAST_QUEUE, BROADCAST_EXCHANGE, "");
+
+        DeliverCallback deliverCallback = (consumerTag, delivery) -> {
+            try {
+                TaskService t = (TaskService) Communication.deserialize(delivery.getBody());
+                this.log(" [x] New Task there'" + t.toString() + "'");
+                //this.log(t.compute(work,broadcast));
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                this.log("Problem during BROADCAST");
+            }
+        };
+        this.recievedBroadcastChanel.basicConsume(BROADCAST_QUEUE, true, deliverCallback, consumerTag -> { });
 
     }
 
-    private void initConnectionFANOUT() throws IOException, TimeoutException {
+    /**
+     * Wait for download game map
+     *
+     * @throws IOException
+     * @throws TimeoutException
+     */
+    private void initConnectionInitMap() throws IOException {
 
-        this.broadcast = connection.createChannel();
-        this.broadcast.exchangeDeclare("BROADCAST", "fanout");
-        String queueName = broadcast.queueDeclare().getQueue();
-        this.broadcast.queueBind(queueName, "BROADCAST", "");
+        this.initMap = connection.createChannel();
+        this.initMap.exchangeDeclare(INITMAP_EXCHANGE, "fanout");
+        String queueName = initMap.queueDeclare().getQueue();
+        this.initMap.queueBind(queueName, INITMAP_EXCHANGE, "");
 
         monitor = new Object();
 
@@ -134,6 +255,7 @@ public class Server implements Runnable {
             this.log("Received map from manager");
             try {
                 this.map = (ArrayList<Zone>) Communication.deserialize(delivery.getBody());
+                this.initServices();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -142,19 +264,9 @@ public class Server implements Runnable {
             }
             this.initOk = true;
         };
-        this.broadcast.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
+        this.initMap.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
     }
 
-    private void initConnectionRPC(){
-            try (RPC_INIT rpcInit = new RPC_INIT(this.connection, this.RPC_INI_QUEUE_NAME, this.uniqueServeurQueue)) {
-                this.log("Requesting Initialisation from manager");
-                this.log("Getting data from manager");
-                this.informationsServeur = rpcInit.call();
-                this.log("Connection fully establish");
-            } catch (IOException | TimeoutException | InterruptedException e) {
-                e.printStackTrace();
-            }
-    }
 
     private void waitForAllServersReady(){
         if (!initOk) {
@@ -164,7 +276,6 @@ public class Server implements Runnable {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
             }
         }
     }
@@ -172,4 +283,5 @@ public class Server implements Runnable {
     private void log(String message){
         System.out.println("[" + this.SERVER_NAME + "] " + message);
     }
+
 }

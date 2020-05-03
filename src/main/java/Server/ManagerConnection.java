@@ -1,31 +1,31 @@
 package Server;
-import Class.InformationsServeur;
+
+import Utils.Communication;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeoutException;
 
-public class RPC_COMMUNICATION implements AutoCloseable {
+public class ManagerConnection implements AutoCloseable {
 
     private Connection connection;
     private Channel channel;
-    InformationsServeur informationsServeur;
     String requestQueueName;
+    String uniqueQueueServer;
 
-    public RPC_COMMUNICATION(Connection connection, String requestQueueName) throws IOException, TimeoutException {
+    public ManagerConnection(Connection connection, String requestQueueName, String uniqueQueueServer) throws IOException {
         this.connection = connection;
         channel = connection.createChannel();
         this.requestQueueName = requestQueueName;
+        this.uniqueQueueServer = uniqueQueueServer;
     }
 
 
-    public String call() throws IOException, InterruptedException {
+    public Integer call() throws IOException, InterruptedException, ClassNotFoundException {
         final String corrId = UUID.randomUUID().toString();
 
         String replyQueueName = channel.queueDeclare().getQueue();
@@ -35,24 +35,21 @@ public class RPC_COMMUNICATION implements AutoCloseable {
                 .replyTo(replyQueueName)
                 .build();
 
-        channel.basicPublish("", requestQueueName, props, null);
+        channel.basicPublish("", requestQueueName, props,  uniqueQueueServer.getBytes("UTF-8"));
 
-        final BlockingQueue<String> response = new ArrayBlockingQueue<>(1);
+        final BlockingQueue<byte[]> response = new ArrayBlockingQueue<>(1);
 
         String ctag = channel.basicConsume(replyQueueName, true, (consumerTag, delivery) -> {
             if (delivery.getProperties().getCorrelationId().equals(corrId)) {
-                response.offer(new String(delivery.getBody(), "UTF-8"));
+                response.offer(delivery.getBody());
             }
         }, consumerTag -> {
         });
 
-        String result = response.take();
-
-        channel.basicCancel(ctag);
-        return result;
+        return (Integer) Communication.deserialize(response.take());
     }
 
     public void close() throws IOException {
-        // connection.close();
+       // connection.close();
     }
 }
