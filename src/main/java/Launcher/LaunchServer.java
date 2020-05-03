@@ -17,8 +17,12 @@ public class LaunchServer extends Application implements RmqConfig {
         primaryStage.setScene(console);
         primaryStage.show();
 
-        if(p.getRaw().size() > 1 && p.getRaw().get(0).equals("-ip")) new Server(RPC_QUEUE_NAME, p.getRaw().get(1), console).run();
-        else new Server(RPC_QUEUE_NAME, RmqConfig.RMQ_SERVER_IP, console).run();
+        if(p.getRaw().size() > 1 && p.getRaw().get(0).equals("-ip")) {
+            new Server(RPC_QUEUE_NAME, p.getRaw().get(1), console).run();
+        }
+        else {
+            new Server(RPC_QUEUE_NAME, RmqConfig.RMQ_SERVER_IP, console).run();
+        }
     }
     public static void main(String[] args) {
         launch(args);
