@@ -13,39 +13,41 @@ public class Console extends Scene  {
     private VBox vBox;
     private DateFormat shortDateFormat;
     ScrollPane scrollPane;
+    private final String whiteConsole = "-fx-background: rgb(255,255,255);\n -fx-background-color:transparent";
+    private final String blackConsole = "-fx-background: rgb(0,0,0);\n -fx-background-color:transparent";
+    Color currentTextColor;
     public Console() {
+
         super(new ScrollPane(), 400, 400);
         this.scrollPane = (ScrollPane) this.getRoot();
         shortDateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
-
-        setFill(Color.BLACK);
-        scrollPane.setStyle("-fx-background: rgb(0,0,0);\n -fx-background-color:transparent");
-
-
-
+        this.setBlack();
          this.vBox = new VBox();
          scrollPane.setContent(vBox);
-         this.addLogs("Test logs");
-         this.addLogs("Test logs");
-         this.addLogs("Test logs");
-         this.addLogs("Test logs");
-         this.addLogs("Test logs");
-         this.addLogs("Test logs");
-         this.addLogs("Test logs");
-         this.addLogs("Test logs");
+        newLog("Terminal");
     }
 
     private void addLogs(String s) {
         String log = shortDateFormat.format(new Date());
         log += " : " + s;
         Text t = new Text(log);
-        t.setFill(Color.BEIGE);
+        t.setFill(currentTextColor);
         vBox.getChildren().add(t);
         scrollPane.vvalueProperty().bind(vBox.heightProperty());
     }
 
     public void newLog(String s){
         Platform.runLater(() -> addLogs(s));
+    }
+
+    public void setWhite(){
+        scrollPane.setStyle(whiteConsole);
+        currentTextColor = Color.BLACK;
+    }
+
+    public void setBlack(){
+        scrollPane.setStyle(blackConsole);
+        currentTextColor = Color.BEIGE;
     }
 }
 
