@@ -43,7 +43,7 @@ public class ClientFX extends Scene implements RmqConfig {
      */
     public ClientFX(double width, double height) throws IOException, TimeoutException {
         super(new BorderPane(),  width,  height);
-        this.logger = new SimpleLogger("CLIENT");
+        this.logger = new SimpleLogger("CLIENT", null);
         this.logger.addTag("FX");
 
         BorderPane borderPane = (BorderPane) this.getRoot();

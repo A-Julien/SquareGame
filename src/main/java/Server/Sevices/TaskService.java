@@ -93,10 +93,8 @@ public class TaskService implements TaskServiceReaction {
     public void playerWantedToMove(Task task) throws IOException {
         Task taskToSend;
 
-
         try{
             // Retrieve client position
-            this.logger.log(task.replyQueu);
             Cell actualPosition = this.mapService.getPosClient(task.replyQueu);
             int dX = 0;
             int dY = 0;
@@ -253,13 +251,9 @@ public class TaskService implements TaskServiceReaction {
     }
 
 
-
     @Override
     public String print() {
         return null;
     }
-
-
-
 
 }

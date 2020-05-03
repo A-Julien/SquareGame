@@ -39,7 +39,7 @@ class ZoneManager extends BorderPane {
 
     ZoneManager(Grid grid, Manager manager) {
         super();
-        this.logger = new SimpleLogger("FX_MAP_BUILDER");
+        this.logger = new SimpleLogger("FX_MAP_BUILDER",null);
 
         this.manager = manager;
         this.grid = grid;
@@ -180,7 +180,7 @@ class ZoneManager extends BorderPane {
         alert.setHeaderText("Waiting server..");
         alert.showAndWait();
 
-        this.logger.logNoNlWithTag("Build map");
+        this.logger.log("Build map");
         setTop(null);
 
         grid.rmHandlerSelection();
@@ -215,10 +215,8 @@ class ZoneManager extends BorderPane {
                     finalZone.get(index).addCell(new Cell(i, j));
                 }
             }
-            this.logger.logNoNl(".");
         }
 
-        System.out.println("");
 
         this.manager.setMap(finalZone);
         this.logger.log("Map correctly parse");

@@ -41,7 +41,7 @@ public class Manager {
         this.rmqServerIp = RmqConfig.RMQ_SERVER_IP;
         this.metaDataServer = new MetaDataServer();
         this.nbThreads = nbThreads;
-        this.logger = new SimpleLogger("MANAGER");
+        this.logger = new SimpleLogger("MANAGER", null);
     }
 
     /**

@@ -23,27 +23,21 @@ import Task.*;
 
 public class Server implements Runnable, RmqConfig {
     private static int ServerID;
+
     private String SERVER_NAME;
     private String RPC_INIT_QUEUE_NAME;
     private Connection connection;
     private Channel newClientChanel;
 
     private List<Zone> map;
-
     private String uniqueServeurQueue;
-
-
     private Integer serverZone;
     private Object monitor;
-
-
     private  String RMQ_HOST;
-
     private boolean initOk = false;
 
     private TaskService taskService;
     private MapService mapService;
-    Console console;
     private SimpleLogger logger;
 
 
@@ -52,10 +46,7 @@ public class Server implements Runnable, RmqConfig {
         this.SERVER_NAME = RMQ_BASIC_SERVER_NAME + ServerID++;
         this.RPC_INIT_QUEUE_NAME = RPC_INIT_QUEUE_NAME;
         this.RMQ_HOST = RMQ_HOST;
-        this.logger = new SimpleLogger(this.SERVER_NAME);
-
-        this.console = console;
-
+        this.logger = new SimpleLogger(this.SERVER_NAME, console);
     }
 
     @Override
@@ -240,14 +231,4 @@ public class Server implements Runnable, RmqConfig {
             }
         }
     }
-
-    private void log(String message){
-        if(this.console == null){
-            System.out.println("[" + this.SERVER_NAME + "] " + message);
-        } else {
-            this.console.newLog(message);
-        }
-
-    }
-
 }

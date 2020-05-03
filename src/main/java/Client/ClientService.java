@@ -33,7 +33,7 @@ public class ClientService  implements ClientReaction{
 
     public ClientService(ClientFX clientFX) throws IOException, TimeoutException {
         this.clientFX = clientFX;
-        this.logger = new SimpleLogger("CLIENT");
+        this.logger = new SimpleLogger("CLIENT", null);
         this.logger.addTag("SERVICE");
 
         ConnectionFactory factory = new ConnectionFactory();
