@@ -158,7 +158,10 @@ public class Manager {
                     new Server(
                             RmqConfig.RPC_QUEUE_NAME,
                             RmqConfig.RMQ_SERVER_IP,
-                            "rmq-server-" + i));
+                            "rmq-server-" +  i ,
+                            null
+                    )
+            );
         }
     }
 
