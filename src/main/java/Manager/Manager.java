@@ -59,6 +59,12 @@ public class Manager implements Loggable {
         this.digestServer();
         this.requireMap();
         this.requireServerExtracted();
+        System.out.println(
+                "Info server to wait : " +
+                " ThreadServer : " + this.metaDataServer.getNbLocalSever() +
+                " ExternalServer : " + this.metaDataServer.getExternalServer() +
+                " Total Server : " + this.metaDataServer.getNbServer()
+                );
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(this.rmqServerIp);
@@ -184,9 +190,13 @@ public class Manager implements Loggable {
      */
     private void digestServer() throws MapNotSetException {
         this.requireMap();
+
+        int counter = 0;
         for (Zone zone : this.zoneList) {
+            counter++;
             this.metaDataServer.addServer(zone.getIp(), zone.getPort());
         }
+        System.out.println("Total server found :" + counter);
     }
 
     /**
