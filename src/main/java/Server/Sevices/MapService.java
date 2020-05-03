@@ -9,7 +9,7 @@ import Exception.*;
 
 import java.util.List;
 
-public class MapService {
+public class MapService  implements MapServiceInterface {
     private List<Zone> map;
     private Integer indexZone;
 
@@ -57,7 +57,7 @@ public class MapService {
      * @return cell
      * @throws CellNotFound if exist no free cell
      */
-    private Cell getFreeCell() throws CellNotFound {
+    public Cell getFreeCell() throws CellNotFound {
         for (Cell cell : this.map.get(this.indexZone).getCells()) if(!cell.isOccupation()) return cell;
         throw new CellNotFound("Can not find free cell");
     }
