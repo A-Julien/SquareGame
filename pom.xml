@@ -38,7 +38,7 @@
                 <executions>
                     <execution>
                         <id>resource-bundles</id>
-                        <phase>package</phase>
+                        <phase>site</phase>
                         <goals>
                             <!-- produce source artifact for main project sources -->
                             <goal>resource-bundle</goal>

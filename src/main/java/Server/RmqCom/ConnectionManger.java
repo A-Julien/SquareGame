@@ -1,6 +1,5 @@
-package Server.ComInit;
+package Server.RmqCom;
 
-import Server.Server;
 import Utils.Communication;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
