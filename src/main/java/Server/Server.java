@@ -2,6 +2,7 @@ package Server;
 import Configuration.RmqConfig;
 import FX.Console;
 
+import Server.ComInit.ConnectionManger;
 import Server.Sevices.MapService;
 import Server.Sevices.TaskService;
 import Utils.Communication;
@@ -20,33 +21,23 @@ import Task.*;
 
 public class Server extends Console implements Runnable, RmqConfig {
     private String SERVER_NAME;
-    private String BROADCAST_QUEUE;
     private String RPC_INIT_QUEUE_NAME;
-    private ConnectionFactory factory;
     private Connection connection;
     private Channel newClientChanel;
-    private Channel recievedBroadcastChanel;
-    private Channel initMap;
     private Channel sendBroadcastChanel;
-    private Channel outChannel;
 
-//    private Channel newClient;
-    private Channel incomingInstruction;
     private List<Zone> map;
 
-    // Propre à chaque serveur
     private String uniqueServeurQueue;
 
 
     private Integer serverZone;
     private Object monitor;
 
-    private Object soloClient;
 
     private  String RMQ_HOST;
-    private Console console;
 
-    boolean initOk = false;
+    private boolean initOk = false;
 
     private TaskService taskService;
     private MapService mapService;
@@ -78,8 +69,8 @@ public class Server extends Console implements Runnable, RmqConfig {
      * @throws TimeoutException
      */
     private void initCommunication() throws IOException, TimeoutException {
-        this.factory = new ConnectionFactory();
-        this.factory.setHost(this.RMQ_HOST);
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost(this.RMQ_HOST);
         try{
             this.connection = factory.newConnection();
         } catch ( Exception e ) {
@@ -93,19 +84,22 @@ public class Server extends Console implements Runnable, RmqConfig {
         this.initBroadcastServerMessaging();
         this.initConnectionRPC();
         this.waitForAllServersReady();
-
-
     }
 
+    /**
+     * Init Server services
+     *
+     * @throws IOException
+     */
     private void initServices() throws IOException {
-        this.outChannel = this.connection.createChannel();
+        Channel outChannel = this.connection.createChannel();
         try {
             this.mapService = new MapService(this.map, this.serverZone);
         } catch (ZoneNotFound zoneNotFound) {
            this.log("Error while MapService start : " + zoneNotFound.toString());
            System.exit(-1);
         }
-        this.taskService = new TaskService(this.outChannel, this.sendBroadcastChanel, this.mapService, uniqueServeurQueue);
+        this.taskService = new TaskService(outChannel, this.sendBroadcastChanel, this.mapService, uniqueServeurQueue);
 
     }
 
@@ -116,7 +110,7 @@ public class Server extends Console implements Runnable, RmqConfig {
         try {
             this.log("Requesting Initialisation from manager");
             this.log("Getting data from manager");
-            this.serverZone = ManagerConnection.init(this.connection, this.RPC_INIT_QUEUE_NAME, this.uniqueServeurQueue);
+            this.serverZone = ConnectionManger.init(this.connection, this.RPC_INIT_QUEUE_NAME, this.uniqueServeurQueue);
             this.log("Connection fully establish");
         } catch (IOException | InterruptedException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -129,30 +123,27 @@ public class Server extends Console implements Runnable, RmqConfig {
      * @throws IOException
      */
     private void initClientCallbackInstruction() throws IOException{
-        this.incomingInstruction = connection.createChannel();
+        Channel incomingInstruction = connection.createChannel();
         this.uniqueServeurQueue =  incomingInstruction.queueDeclare("", true, false, false, null).getQueue();
         incomingInstruction.basicQos(1);
         this.log("Server status : " + this.SERVER_NAME + " queue declare" + uniqueServeurQueue);
+
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
 
-
             try {
-
                 Task task = (Task) Communication.deserialize(delivery.getBody());
                 this.log(" [x] New Task there'" + task.toString() + "'");
                 taskService.compute(task);
-
-
             } catch (ClassNotFoundException | UnknownCmd e) {
                 e.printStackTrace();
                 this.log("Problem during task");
             }
         };
-        this.incomingInstruction.basicConsume(this.uniqueServeurQueue, true, deliverCallback, consumerTag -> { });
+        incomingInstruction.basicConsume(this.uniqueServeurQueue, true, deliverCallback, consumerTag -> { });
     }
 
     /**
-     * Wait for new Client
+     * Wait for new ClientFX
      *
      * @throws IOException
      * @throws TimeoutException
@@ -186,20 +177,12 @@ public class Server extends Console implements Runnable, RmqConfig {
 
             try {
                 this.newClientChanel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);   //si place dans la map
-
                 Task taskSend = new Task(TaskCommand.INIT,  mapService.initPositionClient(task.replyQueu), uniqueServeurQueue);
-
                 this.newClientChanel.basicPublish("", task.replyQueu, replyProps, Communication.serialize(taskSend));
-
 
             } catch (CellNotFound e){
                 this.newClientChanel.basicNack(delivery.getEnvelope().getDeliveryTag(), true, true);   //si pas place
             }
-
-
-
-
-
         };
 
         newClientChanel.basicConsume(POOL_CLIENT_QUEUE, false, deliverCallback, (consumerTag -> { }));
@@ -217,10 +200,10 @@ public class Server extends Console implements Runnable, RmqConfig {
         this.sendBroadcastChanel = connection.createChannel();
         this.sendBroadcastChanel.exchangeDeclare(BROADCAST_EXCHANGE, "fanout");
 
-        this.recievedBroadcastChanel = connection.createChannel();
-        this.recievedBroadcastChanel.exchangeDeclare(BROADCAST_EXCHANGE, "fanout");
-        this.BROADCAST_QUEUE = recievedBroadcastChanel.queueDeclare().getQueue();
-        this.recievedBroadcastChanel.queueBind(BROADCAST_QUEUE, BROADCAST_EXCHANGE, "");
+        Channel recievedBroadcastChanel = connection.createChannel();
+        recievedBroadcastChanel.exchangeDeclare(BROADCAST_EXCHANGE, "fanout");
+        String BROADCAST_QUEUE = recievedBroadcastChanel.queueDeclare().getQueue();
+        recievedBroadcastChanel.queueBind(BROADCAST_QUEUE, BROADCAST_EXCHANGE, "");
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             try {
@@ -232,7 +215,8 @@ public class Server extends Console implements Runnable, RmqConfig {
                 this.log("Problem during BROADCAST");
             }
         };
-        this.recievedBroadcastChanel.basicConsume(BROADCAST_QUEUE, true, deliverCallback, consumerTag -> { });
+
+        recievedBroadcastChanel.basicConsume(BROADCAST_QUEUE, true, deliverCallback, consumerTag -> { });
 
     }
 
@@ -244,10 +228,10 @@ public class Server extends Console implements Runnable, RmqConfig {
      */
     private void initConnectionInitMap() throws IOException {
 
-        this.initMap = connection.createChannel();
-        this.initMap.exchangeDeclare(INITMAP_EXCHANGE, "fanout");
+        Channel initMap = connection.createChannel();
+        initMap.exchangeDeclare(INITMAP_EXCHANGE, "fanout");
         String queueName = initMap.queueDeclare().getQueue();
-        this.initMap.queueBind(queueName, INITMAP_EXCHANGE, "");
+        initMap.queueBind(queueName, INITMAP_EXCHANGE, "");
 
         monitor = new Object();
 
@@ -264,10 +248,12 @@ public class Server extends Console implements Runnable, RmqConfig {
             }
             this.initOk = true;
         };
-        this.initMap.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
+        initMap.basicConsume(queueName, true, deliverCallback, consumerTag -> { });
     }
 
-
+    /**
+     * Synchronise Server
+     */
     private void waitForAllServersReady(){
         if (!initOk) {
             synchronized (monitor) {

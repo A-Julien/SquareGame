@@ -1,8 +1,8 @@
-package Client;
+package Launcher;
+import FX.Client.ClientFX;
 import Manager.Manager;
 import javafx.application.Application;
 import javafx.stage.*;
-import FX.Client;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -16,8 +16,8 @@ public class LaunchClient extends Application{
 
         primaryStage.setTitle("SquaregGame - Julien ALAIMO - Olivier HUREAU");
         primaryStage.show();
-        Client client = new Client(400,400);
-        primaryStage.setScene(client);
+        ClientFX clientFX = new ClientFX(400,400);
+        primaryStage.setScene(clientFX);
     }
 
 

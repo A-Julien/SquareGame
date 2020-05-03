@@ -3,7 +3,7 @@ import Manager.Map.Cell;
 
 import Task.Task;
 import Task.TaskCommand;
-import Task.Deplacement;
+import Utils.Direction;
 
 import Utils.Communication;
 import com.rabbitmq.client.Channel;
@@ -98,17 +98,17 @@ public class TaskService implements TaskServiceReaction {
             Cell actualPosition = this.mapService.getPosClient(task.replyQueu);
             int dX = 0;
             int dY = 0;
-            switch((Deplacement) task.cmd){
-                case BAS:
+            switch((Direction) task.cmd){
+                case DOWN:
                     dY = 1;
                     break;
-                case HAUT:
+                case UP:
                     dY = -1;
                     break;
-                case GAUCHE:
+                case LEFT:
                     dX = -1;
                     break;
-                case DROITE:
+                case RIGHT:
                     dX = 1;
             }
             Cell target = new Cell( actualPosition.getX() + dX, actualPosition.getY() + dY);

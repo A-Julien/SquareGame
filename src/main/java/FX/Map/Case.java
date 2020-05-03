@@ -1,4 +1,4 @@
-package FX;
+package FX.Map;
 
 import Manager.Map.ZoneFx;
 import javafx.scene.paint.Color;
@@ -29,18 +29,18 @@ public class Case extends Rectangle {
         return point;
     }
 
-    void changerCouleur(Color c) {
+    public void colorSwap(Color c) {
         setFill(c);
     }
 
     public void setZone(ZoneFx zone) {
         this.zoneFx = zone;
-        changerCouleur(zoneFx.getZoneColor());
+        colorSwap(zoneFx.getZoneColor());
     }
 
     public void removeZone() {
         zoneFx = null;
-        changerCouleur(Color.WHITE);
+        colorSwap(Color.WHITE);
     }
 
     public ZoneFx getZoneFx() {
@@ -49,7 +49,7 @@ public class Case extends Rectangle {
 
     public void setZoneFx(ZoneFx zoneFx) {
         this.zoneFx = zoneFx;
-        changerCouleur(zoneFx.getZoneColor());
+        colorSwap(zoneFx.getZoneColor());
     }
 
     @Override

@@ -1,11 +1,14 @@
 package Client;
+import Task.Task;
+import Utils.Direction;
 import com.rabbitmq.client.Channel;
 
 import java.io.IOException;
 
 public interface ClientReaction {
-    public String reactToPong();
-    public String reactToPing(Channel channel) throws IOException;
-    public String sayHelloToFriend(Channel channel, String myQueue) throws IOException;
+     void reactToPong();
+     void reactToPing(Task task) throws IOException;
+     void changeColor(Task task);
+     void handleMouvement(Direction mouvement);
 }
 

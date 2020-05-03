@@ -1,7 +1,8 @@
-package FX;
+package FX.Manager;
 
 import Configuration.FxConfig;
 import FX.Manager.ZoneManager;
+import FX.Map.Grid;
 import Manager.Manager;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -15,7 +16,7 @@ public class MenuSelectionZone extends Scene {
     private BorderPane borderPane;
     private ZoneManager zoneManager;
 
-    MenuSelectionZone(double largeur, double hauteur, Manager manager){
+    public MenuSelectionZone(double largeur, double hauteur, Manager manager){
         super(new BorderPane(),  largeur,  hauteur);
         Window primary = this.getWindow();
         borderPane = (BorderPane) this.getRoot();

@@ -1,5 +1,6 @@
-package Server;
+package Server.ComInit;
 
+import Server.Server;
 import Utils.Communication;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
@@ -10,10 +11,9 @@ import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public abstract class ManagerConnection implements AutoCloseable {
+public abstract class ConnectionManger implements AutoCloseable {
 
-
-    static Integer init(Connection connection, String requestQueueName, String uniqueQueueServer) throws IOException, InterruptedException, ClassNotFoundException {
+    public static Integer init(Connection connection, String requestQueueName, String uniqueQueueServer) throws IOException, InterruptedException, ClassNotFoundException {
         Channel channel = connection.createChannel();
         final String corrId = UUID.randomUUID().toString();
 

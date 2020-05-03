@@ -12,6 +12,7 @@ public class Task implements Serializable {
         this.cmd = cmd;
         this.replyQueu = replyQueu;
     }
+
     @Override
     public String toString() {
         return cmdType.toString() + " : " + cmd + " from " + replyQueu;

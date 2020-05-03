@@ -1,4 +1,4 @@
-package FX;
+package FX.Map;
 import Manager.Map.ZoneFx;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
@@ -27,7 +27,7 @@ public class Grid extends Group {
     private boolean manager;
 
 
-    Grid(int nbCaseHauteur, int nbCaseLargeur, double hauteurPX, double largeurPx, boolean manager) {
+    public Grid(int nbCaseHauteur, int nbCaseLargeur, double hauteurPX, double largeurPx, boolean manager) {
         this.x = nbCaseLargeur;
         this.y = nbCaseHauteur;
         this.largeurCase = largeurPx / nbCaseLargeur;
@@ -47,8 +47,6 @@ public class Grid extends Group {
         player.setCenterX(hauteurCase/2);
         player.setCenterY(largeurCase/2);
         player.setRadius(Math.min(hauteurCase, largeurCase)/8*3);
-
-
     }
 
 
@@ -189,11 +187,11 @@ public class Grid extends Group {
         }
     }
 
-    void affCircle(){
+    public void affCircle(){
        if(!getChildren().contains(player)) getChildren().add(player);
     }
 
-    void setPosCircle(int x, int y){
+    public void setPosCircle(int x, int y){
        player.setCenterX(x*largeurCase+largeurCase/2);
         player.setCenterY(y*hauteurCase+hauteurCase/2);
    }
