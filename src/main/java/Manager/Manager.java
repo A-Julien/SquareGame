@@ -53,7 +53,41 @@ public class Manager {
         factory.setHost(this.rmqServerIp);
         connection = factory.newConnection();
 
-        try (Channel channel = connection.createChannel()) {
+        this.initServerSubChanel();
+        this.createServer();
+        this.synchro();
+
+        Channel channelBroadcastServer = connection.createChannel();
+        channelBroadcastServer.exchangeDeclare("INITMAP", "fanout");
+        System.out.println("[MANAGER] All server connected, sending map");
+        channelBroadcastServer.basicPublish(RmqConfig.INITMAP_EXCHANGE, "", null, Communication.serialize(this.zoneList));
+        if (this.metaDataServer.getNbLocalSever() != 0) this.executor.shutdown();
+    }
+
+    /**
+     * wait all server ready
+     */
+    private void synchro(){
+        synchronized (monitor) {
+            try {
+                monitor.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+
+            }
+        }
+    }
+
+    /**
+     *
+     * Init chanel for servers.
+     * Server can connect to the manager by this method.
+     * When server connected, the manager get the server queue and update the map
+     *
+     * @throws IOException
+     */
+    private void initServerSubChanel() throws IOException {
+            Channel channel = connection.createChannel();
 
             channel.queueDeclare(RmqConfig.RPC_QUEUE_NAME, false, false, false, null);
             channel.queuePurge(RmqConfig.RPC_QUEUE_NAME);
@@ -68,13 +102,16 @@ public class Manager {
                         .correlationId(delivery.getProperties().getCorrelationId())
                         .build();
                 String message = new String(delivery.getBody(), "UTF-8");
-                System.out.println("[MANAGER] New Server found  " + message);
-                this.setServerZone(message);
 
+                System.out.println("[MANAGER] New Server found  " + message);
+
+                this.setServerZone(message);
                 channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, Communication.serialize(this.giveZone()));
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
+
                 ServerCount++;
                 System.out.println("[MANAGER] " + ServerCount + " server found of " + this.metaDataServer.getNbServer());
+
                 if (ServerCount == this.metaDataServer.getNbServer()) {
                     synchronized (monitor) {
                         monitor.notify();
@@ -84,27 +121,6 @@ public class Manager {
 
             System.out.println("[MANAGER] Awaiting " + this.metaDataServer.getNbServer() + " RPC requests from Server");
             channel.basicConsume(RmqConfig.RPC_QUEUE_NAME, false, deliverCallback, (consumerTag -> { }));
-
-            this.createServer();
-
-            synchronized (monitor) {
-                try {
-                    monitor.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-
-                }
-            }
-
-            Channel channelBroadcastServer = connection.createChannel();
-            channelBroadcastServer.exchangeDeclare("INITMAP", "fanout");
-
-            System.out.println("[MANAGER] All server connected, sending map");
-
-            channelBroadcastServer.basicPublish(RmqConfig.INITMAP_EXCHANGE, "", null, Communication.serialize(this.zoneList));
-
-            if (this.metaDataServer.getNbLocalSever() != 0) this.executor.shutdown();
-        }
     }
 
 

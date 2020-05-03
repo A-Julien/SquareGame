@@ -1,4 +1,5 @@
 package FX;
+
 import Manager.Map.ZoneFx;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -7,54 +8,52 @@ import javafx.scene.shape.StrokeType;
 import java.awt.*;
 
 public class Case extends Rectangle {
-    Point p;
-    ZoneFx z;
+    private Point point;
+    private ZoneFx zoneFx;
 
-    Case(int x, int y, double hauteur, double largeur ){
-        p = new Point(x,y);
+    Case(int x, int y, double height, double width) {
+        point = new Point(x, y);
 
-        setX(x*largeur);
-        setY(y*hauteur);
-        setWidth(largeur);
-        setHeight(hauteur);
+        setX(x * width);
+        setY(y * height);
+        setWidth(width);
+        setHeight(height);
         setFill(Color.WHITE);
         setStrokeType(StrokeType.CENTERED);
         setStroke(Color.BLACK);
 
     }
 
-
-
-
-
-    public Point getPoint(){
-        return p;
+    
+    public Point getPoint() {
+        return point;
     }
 
-    public void changerCouleur(Color c){
+    void changerCouleur(Color c) {
         setFill(c);
     }
 
-    public void setZone(ZoneFx zone){
-        this.z = zone;
-        changerCouleur(z.getZoneColor());
+    public void setZone(ZoneFx zone) {
+        this.zoneFx = zone;
+        changerCouleur(zoneFx.getZoneColor());
     }
 
-    public void removeZone(){
-        z = null;
+    public void removeZone() {
+        zoneFx = null;
         changerCouleur(Color.WHITE);
     }
 
-    public ZoneFx getZ() {
-        return z;
+    public ZoneFx getZoneFx() {
+        return zoneFx;
     }
 
-    public void setZ(ZoneFx z) {
-        this.z = z;
-        changerCouleur(z.getZoneColor());
+    public void setZoneFx(ZoneFx zoneFx) {
+        this.zoneFx = zoneFx;
+        changerCouleur(zoneFx.getZoneColor());
     }
+
     @Override
     public String toString() {
-        return "Position : ("+p.getX()+" ; " + p.getY() + " ).\n" + z;
+        return "Position : (" + point.getX() + " ; " + point.getY() + " ).\n" + zoneFx;
     }
 }

@@ -57,13 +57,6 @@ public class TaskService implements TaskServiceReaction {
         return "Tache innconue "; //+ this.cmd + " de type " + this.type;
     }
 
-    public void forward(String to, Channel channel){
-
-    }
-
-    boolean isInZone(){
-        return true;
-    }
 
     /**
      * Send color to client
@@ -120,13 +113,12 @@ public class TaskService implements TaskServiceReaction {
             }
             Cell target = new Cell( actualPosition.getX() + dX, actualPosition.getY() + dY);
 
-           if(mapService.isInMyZone(target)){
+           if(this.mapService.isInMyZone(target)){
              // The destination is in the current handled zone
-
                try {
 
-                   mapService.isPosFree(target);
-                   mapService.moveClient(task.replyQueu, target);
+                   this.mapService.isPosFree(target);
+                   this.mapService.moveClient(task.replyQueu, target);
 
                    taskToSend = new Task(TaskCommand.MOVE_GRANTED,target, null);
                    checkForNeighbor( target, task.replyQueu);
@@ -142,7 +134,7 @@ public class TaskService implements TaskServiceReaction {
            }
             try {
 
-                String queueServerHandlingCible = mapService.whoManageCell(target);
+                String queueServerHandlingCible = this.mapService.whoManageCell(target);
                 task.cmd = target;
 
                 taskToSend = new Task(TaskCommand.FORWARD_MESSAGE, task, myReponsseQueue );
@@ -157,7 +149,7 @@ public class TaskService implements TaskServiceReaction {
         } catch ( ClientNotFound err){
             System.out.println("Error : " + err.toString());
             taskToSend = new Task(TaskCommand.CLIENT_NOT_FOUNDED, null , null);
-             this.outChannel.basicPublish("",task.replyQueu, null, null);
+             this.outChannel.basicPublish("",task.replyQueu, null, Communication.serialize(taskToSend));
         }
     }
 
@@ -199,48 +191,48 @@ public class TaskService implements TaskServiceReaction {
 
     /**
      * Contact the servers that handle the cells next to this one for saying hello to client
-     * @param c
+     * @param cell the actual client cell
      */
     @Override
-    public void checkForNeighbor(Cell c, String queueClient) {
-        Cell voisine;
+    public void checkForNeighbor(Cell cell, String queueClient) {
+        Cell neighbour;
         Task contactServerNeighbor;
 
         try {
-            voisine = new Cell(c.getX()+1, c.getY());
-            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, voisine , queueClient);
-            if(mapService.whoManageCell(voisine) != null)
-                this.outChannel.basicPublish("",mapService.whoManageCell(voisine), null,  Communication.serialize(contactServerNeighbor));
+            neighbour = new Cell(cell.getX()+1, cell.getY());
+            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, neighbour , queueClient);
+            if(mapService.whoManageCell(neighbour) != null)
+                this.outChannel.basicPublish("",mapService.whoManageCell(neighbour), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
             System.out.println("Cell out of bounds");
         }
 
         try {
-            voisine = new Cell(c.getX()-1, c.getY());
-            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, voisine , queueClient);
-            if(mapService.whoManageCell(voisine) != null)
-                this.outChannel.basicPublish("",mapService.whoManageCell(voisine), null,  Communication.serialize(contactServerNeighbor));
+            neighbour = new Cell(cell.getX()-1, cell.getY());
+            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, neighbour , queueClient);
+            if(mapService.whoManageCell(neighbour) != null)
+                this.outChannel.basicPublish("",mapService.whoManageCell(neighbour), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
             System.out.println("Cell out of bounds");
         }
 
         try {
-            voisine = new Cell(c.getX(), c.getY()+1);
-            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, voisine , queueClient);
-            if(mapService.whoManageCell(voisine) != null)
-                this.outChannel.basicPublish("",mapService.whoManageCell(voisine), null,  Communication.serialize(contactServerNeighbor));
+            neighbour = new Cell(cell.getX(), cell.getY()+1);
+            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, neighbour , queueClient);
+            if(mapService.whoManageCell(neighbour) != null)
+                this.outChannel.basicPublish("",mapService.whoManageCell(neighbour), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
             System.out.println("Cell out of bounds");
         }
 
         try {
-            voisine = new Cell(c.getX(), c.getY()-1);
-            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, voisine , queueClient);
-            if(mapService.whoManageCell(voisine) != null)
-                this.outChannel.basicPublish("",mapService.whoManageCell(voisine), null,  Communication.serialize(contactServerNeighbor));
+            neighbour = new Cell(cell.getX(), cell.getY()-1);
+            contactServerNeighbor = new Task(TaskCommand.NEIHGBOR, neighbour , queueClient);
+            if(mapService.whoManageCell(neighbour) != null)
+                this.outChannel.basicPublish("",mapService.whoManageCell(neighbour), null,  Communication.serialize(contactServerNeighbor));
 
         } catch (IOException | ZoneNotFound err) {
             System.out.println("Cell out of bounds");

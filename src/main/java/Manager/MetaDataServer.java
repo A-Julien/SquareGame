@@ -4,17 +4,18 @@ import java.util.HashMap;
 
 /**
  * MetaData Server For Manager
+ * Only use by Manager
  */
-public class MetaDataServer {
+class MetaDataServer {
     private int nbLocalSever;
     private HashMap<String,String> serverListInfo = null;
 
-    public MetaDataServer() {
+    MetaDataServer() {
         this.nbLocalSever = 0;
         this.serverListInfo = new HashMap<>();
     }
 
-    public void addServer(String ip, String port){
+    void addServer(String ip, String port){
         if(ip.equals("auto")) {
             this.nbLocalSever++;
             return;
@@ -22,15 +23,15 @@ public class MetaDataServer {
         this.serverListInfo.put(ip, port);
     }
 
-    public int getNbLocalSever() {
+    int getNbLocalSever() {
         return nbLocalSever;
     }
 
-    public int getNbServer(){
+    int getNbServer(){
         return this.serverListInfo.size() + this.nbLocalSever;
     }
 
-    public HashMap<String, String> getServerListInfo() {
+    HashMap<String, String> getServerListInfo() {
         return serverListInfo;
     }
 }
