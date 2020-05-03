@@ -1,7 +1,7 @@
 package FX.Manager;
 
-import FX.Case;
-import FX.Grid;
+import FX.Map.Case;
+import FX.Map.Grid;
 import Manager.Map.Cell;
 import Manager.Map.ZoneFx;
 import Manager.Manager;

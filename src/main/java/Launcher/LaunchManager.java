@@ -1,13 +1,14 @@
-package FX;
+package Launcher;
+
+import FX.Manager.MenuSelectionZone;
 import Manager.Manager;
-import javafx.application.Application;
-import javafx.stage.*;
-import javafx.geometry.*;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 
-import java.util.logging.Logger;
+import static javafx.application.Application.launch;
 
-// assumes the current class is called MyLogger
-public class Main extends Application{
+public class LaunchManager {
     private Manager manager;
 
     public void start(Stage primaryStage) {
@@ -29,5 +30,4 @@ public class Main extends Application{
     public static void main(String[] args) {
         launch(args);
     }
-
- }
+}
