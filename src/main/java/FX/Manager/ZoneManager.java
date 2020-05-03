@@ -217,9 +217,11 @@ class ZoneManager extends BorderPane {
 
         this.manager.setMap(finalZone);
         this.logger.log("Map correctly parse");
+
         for(Zone zone : finalZone){
             this.logger.log(zone.toString());
         }
+
         refreshTable();
         try {
             this.manager.run();

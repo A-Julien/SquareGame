@@ -7,7 +7,7 @@ import java.util.HashMap;
  * Only use by Manager
  */
 class MetaDataServer {
-    private int nbLocalSever;
+    private Integer nbLocalSever;
     private HashMap<String,String> serverListInfo = null;
 
     MetaDataServer() {
@@ -17,7 +17,9 @@ class MetaDataServer {
 
     void addServer(String ip, String port){
         if(ip.equals("auto")) {
-            this.nbLocalSever++;
+            synchronized (nbLocalSever){
+                this.nbLocalSever++;
+            }
             return;
         }
         this.serverListInfo.put(ip, port);
@@ -25,6 +27,10 @@ class MetaDataServer {
 
     int getNbLocalSever() {
         return nbLocalSever;
+    }
+
+    int getExternalServer(){
+        return this.serverListInfo.size();
     }
 
     int getNbServer(){
