@@ -6,7 +6,7 @@ import Manager.Map.Cell;
 import Manager.Map.ZoneFx;
 import Manager.Manager;
 import Manager.Map.Zone;
-import Utils.SimpleLogger;
+import Utils.Logger.SimpleLogger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;

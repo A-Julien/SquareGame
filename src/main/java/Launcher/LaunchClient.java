@@ -16,7 +16,7 @@ public class LaunchClient extends Application{
 
         primaryStage.setTitle("SquaregGame - Julien ALAIMO - Olivier HUREAU");
         primaryStage.show();
-        ClientFX clientFX = new ClientFX(400,400);
+        ClientFX clientFX = new ClientFX(800,400);
         primaryStage.setScene(clientFX);
     }
 

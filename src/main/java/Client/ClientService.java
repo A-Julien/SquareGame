@@ -2,12 +2,14 @@ package Client;
 
 import Configuration.RmqConfig;
 import FX.Client.ClientFX;
+import FX.Console;
 import Manager.Map.Cell;
 import Utils.Direction;
 import Task.Task;
 import Task.TaskCommand;
 import Utils.Communication;
-import Utils.SimpleLogger;
+import Utils.Logger.Loggable;
+import Utils.Logger.SimpleLogger;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -19,7 +21,7 @@ import java.util.concurrent.TimeoutException;
 
 import static Configuration.RmqConfig.RMQ_SERVER_IP;
 
-public class ClientService  implements ClientReaction{
+public class ClientService  implements ClientReaction , Loggable {
     private Channel sendChanel;
     private Channel receivedChanel;
 
@@ -161,6 +163,11 @@ public class ClientService  implements ClientReaction{
         this.clientFX.showAlert2();
         Task t = new Task(TaskCommand.PONG, null, null);
         sendChanel.basicPublish("", task.replyQueu, null, Communication.serialize(t));
+    }
+
+    @Override
+    public void setConsole(Console console){
+        logger.setConsole(console);
     }
 
 }
