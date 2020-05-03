@@ -223,7 +223,7 @@ class ZoneManager extends BorderPane {
         refreshTable();
         try {
             this.manager.run();
-        } catch (ServerNotSetException | TimeoutException | MapNotSetException | IOException e) {
+        } catch (ServerNotSetException  | MapNotSetException | IOException e) {
             System.out.println("Manager error while starting : " + e.toString());
         }
     }
