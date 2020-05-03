@@ -2,6 +2,9 @@ package Manager;
 
 import java.util.HashMap;
 
+/**
+ * MetaData Server For Manager
+ */
 public class MetaDataServer {
     private int nbLocalSever;
     private HashMap<String,String> serverListInfo = null;
