@@ -1,5 +1,6 @@
 package FX;
 
+import Configuration.FxConfig;
 import Manager.Map.Cell;
 import Configuration.RmqConfig;
 import Task.Deplacement;
@@ -12,16 +13,12 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.DeliverCallback;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
-import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -29,34 +26,29 @@ import java.util.concurrent.TimeoutException;
 
 
 public class Client extends Scene implements RmqConfig {
-    BorderPane borderPane;
-    Grid grid;
-    Channel envoyerInformation;
+    private Grid grid;
+    private Channel envoyerInformation;
     private Alert alert1;
     private Alert alert2;
 
-    Cell pos;
-    int i;
-    boolean synchro;
+    private Cell pos;
 
-    private static final String TASK_QUEUE_NAME = "task_queue";
     private static String queuServer;
     private static String myQueue;
 
-    Object monitor;
+    private static final Object monitor = new Object();
 
 
     public Client(double largeur, double hauteur) throws IOException, TimeoutException {
         super(new BorderPane(),  largeur,  hauteur);
-        monitor = new Object();
-        borderPane = (BorderPane) this.getRoot();
 
-        grid = new Grid(10,10,hauteur*0.9,largeur*0.9, false);
+        BorderPane borderPane = (BorderPane) this.getRoot();
+
+        grid = new Grid(FxConfig.height,FxConfig.width,hauteur*0.9,largeur*0.9, false);
 
         this.pos = new Cell(0,0);
 
         borderPane.setCenter(grid);
-        synchro = false;
 
         this.alert1 = new Alert(Alert.AlertType.INFORMATION);
         this.alert1.setTitle("Regardez aux alentours !");
@@ -69,39 +61,36 @@ public class Client extends Scene implements RmqConfig {
         this.alert2.setContentText("*Regard de haine* Bonjour à vous aussi...");
 
 
-        EventHandler<KeyEvent> clavier = new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent key) {
+        EventHandler<KeyEvent> clavier = key -> {
 
-                System.out.println(myQueue + key.getCode() + " : " + key.getTarget() + " ");
-                Deplacement dep;
+            System.out.println(myQueue + key.getCode() + " : " + key.getTarget() + " ");
+            Deplacement dep;
 
-                Cell p = new Cell(0,0);
+            Cell p = new Cell(0,0);
 
-                if(key.getCode()== KeyCode.Q || key.getCode()== KeyCode.LEFT) {
-                    System.out.println("Déplacement GAUCHE");
-                 dep = Deplacement.GAUCHE;
-                } else if(key.getCode()== KeyCode.D || key.getCode()== KeyCode.RIGHT) {
-                    System.out.println("Déplacement droite");
-                    dep = Deplacement.DROITE;
-                } else if(key.getCode()== KeyCode.Z || key.getCode()== KeyCode.UP) {
-                    System.out.println("Déplacement Haut");
-                    dep = Deplacement.HAUT;
-                } else if(key.getCode()== KeyCode.S || key.getCode()== KeyCode.DOWN) {
-                    dep = Deplacement.BAS;
-                    p.setY(1);
-                } else {
-                    return;
-                }
-
-                try {
-                    handleMouvement(dep);
-                } catch (IOException e) {
-                    System.out.println("Impossible de communiquer avec le serveur");
-                    e.printStackTrace();
-                }
-
+            if(key.getCode()== KeyCode.Q || key.getCode()== KeyCode.LEFT) {
+                System.out.println("Déplacement GAUCHE");
+             dep = Deplacement.GAUCHE;
+            } else if(key.getCode()== KeyCode.D || key.getCode()== KeyCode.RIGHT) {
+                System.out.println("Déplacement droite");
+                dep = Deplacement.DROITE;
+            } else if(key.getCode()== KeyCode.Z || key.getCode()== KeyCode.UP) {
+                System.out.println("Déplacement Haut");
+                dep = Deplacement.HAUT;
+            } else if(key.getCode()== KeyCode.S || key.getCode()== KeyCode.DOWN) {
+                dep = Deplacement.BAS;
+                p.setY(1);
+            } else {
+                return;
             }
+
+            try {
+                handleMouvement(dep);
+            } catch (IOException e) {
+                System.out.println("Impossible de communiquer avec le serveur");
+                e.printStackTrace();
+            }
+
         };
 
 
@@ -160,9 +149,6 @@ public class Client extends Scene implements RmqConfig {
                         );
                         break;
                     case MOVE_GRANTED_FORWARDED:
-                       // this.envoyerInformation.close();
-                       // this.envoyerInformation = connection.createChannel();
-
                         queuServer = task.replyQueu;
                         mouvement((Cell) task.cmd);
                         // CHANGER COULEUR ? :)
@@ -197,18 +183,15 @@ public class Client extends Scene implements RmqConfig {
 
     private void handleMouvement(Deplacement mouvement) throws IOException {
         System.out.println("Déplacement souhaité : " + mouvement);
-       // Cell to = new Cell(pos.getX() + mouvement.getX(), pos.getY()+mouvement.getY());
         Task TaskToSend = new Task(TaskCommand.MOVE,mouvement, myQueue);
         this.envoyerInformation.basicPublish("",queuServer, null, Communication.serialize(TaskToSend));
-     /*   synchronized(monitor) {
+        synchronized(monitor) {
             try {
                 monitor.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-*/
-
     }
 
     private void mouvement(Cell p){
@@ -224,10 +207,4 @@ public class Client extends Scene implements RmqConfig {
         }
 
     }
-
-
-
-
-
-
 }

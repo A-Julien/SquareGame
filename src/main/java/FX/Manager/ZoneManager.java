@@ -40,7 +40,7 @@ public class ZoneManager extends BorderPane {
 
         this.manager = manager;
         this.grid = grid;
-        tableView = new TableView<ZoneFx>();
+        tableView = new TableView<>();
         tableView.setEditable(true);
 
         tableView.setOnMousePressed(event -> {
@@ -72,16 +72,10 @@ public class ZoneManager extends BorderPane {
 
         zoneIP.setCellFactory(TextFieldTableCell.<ZoneFx>forTableColumn());
         zoneIP.setOnEditCommit((TableColumn.CellEditEvent<ZoneFx, String> event) -> {
-            //TablePosition<Zone, String> pos = event.getTablePosition();
             String newName = event.getNewValue();
             System.out.println("Modification en : " + newName);
             tableView.getItems().get(event.getTablePosition().getRow()).setIp(newName);
         });
-
-
-
-
-
 
         tableView.getColumns().addAll(zoneName,cCol, zoneIP);
 
@@ -148,13 +142,13 @@ public class ZoneManager extends BorderPane {
         for(int i = 0; i < grid.getX(); i ++){
             for(int j = 0; j < grid.getX(); j ++){
                 Case c = grid.getCell(i,j);
-                c.setZ(initialZone);
+                c.setZoneFx(initialZone);
             }
         }
     }
 
 
-    public void refreshTable(){
+    private void refreshTable(){
         ObservableList<ZoneFx> list = FXCollections.observableArrayList();
         for(int i = 0 ; i < zones.size(); i++){
             list.add(zones.get(i));
@@ -166,7 +160,7 @@ public class ZoneManager extends BorderPane {
         return currentZone;
     }
 
-    public void refreshCellOnGrid(Zone delete){
+    private void refreshCellOnGrid(Zone delete){
         System.out.println("Je dois metre a jour toutes les cellules");
         if(delete != null){
             System.out.println("La zone " + delete + " a était supprimé");
@@ -174,14 +168,13 @@ public class ZoneManager extends BorderPane {
         for(int i = 0; i < grid.getX(); i ++){
             for(int j = 0; j < grid.getX(); j ++){
                 Case c = grid.getCell(i,j);
-                if(c.getZ() == delete){
+                if(c.getZoneFx() == delete){
                     System.out.println("Il faut supprimer la zone pour " + c.getPoint());
-                    c.setZ(initialZone);
-                   // c.removeZone();
+                    c.setZoneFx(initialZone);
                 } else {
                     for(ZoneFx z : zones){
-                        if(c.getZ().getId() == z.getId() ){
-                            c.setZ(z);
+                        if(c.getZoneFx().getId() == z.getId() ){
+                            c.setZoneFx(z);
                         }
                     }
                 }
@@ -192,6 +185,7 @@ public class ZoneManager extends BorderPane {
     public Button getLaunchButton(){
         return launch;
     }
+
 
     /**
      * Button start trigger
@@ -209,10 +203,8 @@ public class ZoneManager extends BorderPane {
 
         System.out.print("Build map");
         setTop(null);
-        //toolBar = new ToolBar(print);
-        //setTop(toolBar);
+
         grid.rmHandlerSelection();
-        //zones.add(initialZone);
 
 
         ArrayList<Zone> finalZone = new ArrayList();
@@ -223,7 +215,7 @@ public class ZoneManager extends BorderPane {
                 int index = -1;
                 find = false;
                 for (Zone zone: finalZone) {
-                    if (zone.getId() == grid.cases[i][j].getZ().getId()) { //TODO HUM... PB.. getid()
+                    if (zone.getId() == grid.cases[i][j].getZoneFx().getId()) { //TODO HUM... PB.. getid()
                         find  = true;
                         index++;
                         break;
@@ -231,12 +223,12 @@ public class ZoneManager extends BorderPane {
                     index++;
                 }
                 if(!find){
-                    z = new Zone(grid.cases[i][j].getZ());
+                    z = new Zone(grid.cases[i][j].getZoneFx());
                     z.addCell(new Cell(i, j));
                     z.setColor(
-                            (grid.cases[i][j].getZ()).getZoneColor().getRed(),
-                            (grid.cases[i][j].getZ()).getZoneColor().getGreen(),
-                            (grid.cases[i][j].getZ()).getZoneColor().getBlue()
+                            (grid.cases[i][j].getZoneFx()).getZoneColor().getRed(),
+                            (grid.cases[i][j].getZoneFx()).getZoneColor().getGreen(),
+                            (grid.cases[i][j].getZoneFx()).getZoneColor().getBlue()
                     );
 
                     finalZone.add(z);

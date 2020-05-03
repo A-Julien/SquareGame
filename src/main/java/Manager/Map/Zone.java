@@ -13,6 +13,19 @@ public class Zone implements Serializable {
     private ArrayList<Cell> cell;
 
 
+    public Zone(String nom){
+        this.nomZone = nom;
+        cell = new ArrayList<>();
+    }
+
+    public Zone(ZoneFx zone){
+        this.nomZone = zone.getNomZone();
+        this.id = zone.getId();
+        this.cell = zone.getCells();
+        this.ip = zone.getIp();
+        this.port = zone.getPort();
+    }
+
     public String getServerQueueName() {
         return serverQueueName;
     }
@@ -29,23 +42,6 @@ public class Zone implements Serializable {
 
     public ArrayList<Cell> getCells() {
         return cell;
-    }
-
-    public void setCell(ArrayList<Cell> cell) {
-        this.cell = cell;
-    }
-
-    public Zone(String nom){
-        this.nomZone = nom;
-        cell = new ArrayList<>();
-    }
-
-    public Zone(ZoneFx zone){
-        this.nomZone = zone.getNomZone();
-        this.id = zone.getId();
-        this.cell = zone.getCells();
-        this.ip = zone.getIp();
-        this.port = zone.getPort();
     }
 
     public void addCell(Cell c){
@@ -70,10 +66,6 @@ public class Zone implements Serializable {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getIp() {
         return ip;
     }
@@ -84,10 +76,6 @@ public class Zone implements Serializable {
 
     public String getPort() {
         return port;
-    }
-
-    public void setPort(String port) {
-        this.port = port;
     }
 
     public Cell find(Cell cell){

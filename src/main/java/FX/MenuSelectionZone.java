@@ -1,34 +1,26 @@
 package FX;
 
+import Configuration.FxConfig;
 import FX.Manager.ZoneManager;
 import Manager.Manager;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.stage.Window;
-
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 
 public class MenuSelectionZone extends Scene {
-    int nbJoueur = 0;
-    BorderPane borderPane;
-    Grid grid;
-    ZoneManager zoneManager;
-    Button newPlayer;
-    Window primary;
+    private BorderPane borderPane;
+    private ZoneManager zoneManager;
+
     MenuSelectionZone(double largeur, double hauteur, Manager manager){
         super(new BorderPane(),  largeur,  hauteur);
-        primary = this.getWindow();
+        Window primary = this.getWindow();
         borderPane = (BorderPane) this.getRoot();
 
-        grid = new Grid(10,10,hauteur*0.95,largeur/2, true);
+        Grid grid = new Grid(FxConfig.height, FxConfig.width, hauteur * 0.95, largeur / 2, true);
         borderPane.setCenter(grid);
         zoneManager = new ZoneManager(grid, manager);
 
@@ -47,9 +39,7 @@ public class MenuSelectionZone extends Scene {
             borderPane.setRight(null);
 
             alert.showAndWait();
-            //grid.affCircle();
         };
-
 
        zoneManager.getLaunchButton().setOnAction(eventLaunch);
     }

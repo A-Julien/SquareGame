@@ -13,17 +13,13 @@ import java.awt.Point;
 
 public class Grid extends Group {
     public Case[][] cases;
-    private Group zoneSelection= new Group();
     private Group grille = new Group();
     private Rectangle zone = new Rectangle();
-    //int caseHauteur, int caseLargeur, int hauteurPX, int largeurPx;
     private double largeurCase, hauteurCase;
-    int x, y;
+    private int x, y;
 
     private Point caseDebut = new Point(0,0);
-    private Point caseFin = new Point(0,0);
     private Point debutSelection = new Point(0,0);
-    private Point finSelection = new Point(0,0);
     private ZoneFx currentZone;
 
     private Circle player;
@@ -35,22 +31,17 @@ public class Grid extends Group {
         this.x = nbCaseLargeur;
         this.y = nbCaseHauteur;
         this.largeurCase = largeurPx / nbCaseLargeur;
-        //this.largeurCase = this.compute / nbCaseHauteur
         this.hauteurCase = hauteurPX / nbCaseHauteur;
-       // this.hauteurCase = maxHeight() / nbCaseHauteur;
         this.manager = manager;
-
-
 
         createCell();
 
+        Group zoneSelection = new Group();
         this.getChildren().addAll(zoneSelection,grille);
         afficherCases();
         grille.setOpacity(0.5);
-        if(manager){
-            zoneSelection.getChildren().add(zone);
-        }
 
+        if(manager) zoneSelection.getChildren().add(zone);
 
         player = new Circle();
         player.setCenterX(hauteurCase/2);
@@ -62,7 +53,7 @@ public class Grid extends Group {
 
 
 
-    public void afficherCases() {
+    private void afficherCases() {
         grille.getChildren().removeAll();
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
@@ -72,90 +63,56 @@ public class Grid extends Group {
     }
 
 
-    EventHandler<MouseEvent> handlerCLICK = new EventHandler<MouseEvent>() {
+    private EventHandler<MouseEvent> handlerCLICK = event -> colorerZone(
+            ((Case) event.getTarget()).getPoint() ,((Case) event.getTarget()).getPoint()
+    );
 
-        @Override
-        public void handle(MouseEvent event) {
-            //System.out.println("Cliqué sur la case : " + ((Case) event.getTarget()).getPoint());
-            colorerZone( ((Case) event.getTarget()).getPoint() ,((Case) event.getTarget()).getPoint());
-
-        }
+    private EventHandler<MouseEvent> handlerPRESS = event -> {
+        debutSelection = new Point((int)event.getX(), (int) event.getY());
+        caseDebut = ((Case) event.getTarget()).getPoint();
     };
 
-    EventHandler<MouseEvent> handlerPRESS = new EventHandler<MouseEvent>() {
-
-        @Override
-        public void handle(MouseEvent event) {
-            debutSelection = new Point((int)event.getX(), (int) event.getY());
-            caseDebut = ((Case) event.getTarget()).getPoint();
-            //System.out.println("Pressed");
-        }
-    };
-
-    EventHandler<MouseEvent> handlerDetect = new EventHandler<MouseEvent>() {
-
-        @Override
-        public void handle(MouseEvent event) {
-
-            System.out.println("Drag la case : " + caseDebut);
-
-            ((Case) event.getTarget()).startFullDrag();
-            //debutSelection = new Point((int)event.getX(), (int) event.getY());
-            //caseDebut = ((Case) event.getTarget()).getPoint();
-        }
+    private EventHandler<MouseEvent> handlerDetect = event -> {
+        System.out.println("Drag la case : " + caseDebut);
+        ((Case) event.getTarget()).startFullDrag();
     };
 
 
-    EventHandler<MouseEvent> handlerDRAGING = new EventHandler<MouseEvent>() {
-
-        @Override
-        public void handle(MouseEvent event) {
-           finSelection = new Point((int)event.getX(), (int) event.getY());
-           dessinerZoneSelection(debutSelection, finSelection);
-        }
+    private EventHandler<MouseEvent> handlerDRAGING = event -> {
+        Point finSelection = new Point((int) event.getX(), (int) event.getY());
+       dessinerZoneSelection(debutSelection, finSelection);
     };
 
-    EventHandler<MouseEvent> handlerEND = new EventHandler<MouseEvent>() {
-        @Override
-        public void handle(MouseEvent event) {
-            //System.out.println("Finis");
-            caseFin = ((Case) event.getTarget()).getPoint();
-            System.out.println(caseFin);
-            zone.setStroke(Color.TRANSPARENT);
-            zone.setX(0);
-            zone.setY(0);
-            zone.setWidth(0);
-            zone.setHeight(0);
-            colorerZone(caseDebut,caseFin);
+    private EventHandler<MouseEvent> handlerEND = event -> {
+        Point caseFin = ((Case) event.getTarget()).getPoint();
+        System.out.println(caseFin);
+        zone.setStroke(Color.TRANSPARENT);
+        zone.setX(0);
+        zone.setY(0);
+        zone.setWidth(0);
+        zone.setHeight(0);
+        colorerZone(caseDebut, caseFin);
 
 
-        }
     };
 
-    EventHandler<MouseEvent> handlerShowInfoCell = new EventHandler<MouseEvent>() {
+    private EventHandler<MouseEvent> handlerShowInfoCell = event -> {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("");
 
-        @Override
-        public void handle(MouseEvent event) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("");
-
-            alert.setContentText(((Case) event.getTarget()).toString());
-            alert.setHeaderText("Informations :");
-            alert.showAndWait();
+        alert.setContentText(event.getTarget().toString());
+        alert.setHeaderText("Informations :");
+        alert.showAndWait();
 
 
-        }
     };
 
-   public void dessinerZoneSelection(Point p1, Point p2){
-     //  System.out.println("Je dessine");
+   private void dessinerZoneSelection(Point p1, Point p2){
        int minX = Math.min((int)p1.getX(), (int) p2.getX());
        int maxX = Math.max((int)p1.getX(), (int) p2.getX());
        int minY = Math.min((int)p1.getY(), (int) p2.getY());
        int maxY = Math.max((int)p1.getY(), (int) p2.getY());
-     //  zoneSelection.getChildren().removeAll();
 
-      // Rectangle zone = new Rectangle();
        zone.setX(minX);
        zone.setY(minY);
        zone.setWidth(maxX-minX);
@@ -165,21 +122,18 @@ public class Grid extends Group {
        zone.setStroke(Color.BLACK);
     }
 
-    public void colorerZone(Point p1, Point p2){
+    private void colorerZone(Point p1, Point p2){
         int minX = Math.min((int)p1.getX(), (int) p2.getX());
         int maxX = Math.max((int)p1.getX(), (int) p2.getX());
-
         int minY = Math.min((int)p1.getY(), (int) p2.getY());
         int maxY = Math.max((int)p1.getY(), (int) p2.getY());
 
 
         for(int i = minX; i <= maxX; i++){
             for(int j = minY; j <= maxY; j++){
-                //cases[i][j].changerCouleur(currentZone.getColor());
                 cases[i][j].setZone(currentZone);
             }
         }
-        //System.out.print("Coloriage de la zone ");
     }
 
     public void setCurrentZone(ZoneFx zone) {
@@ -190,20 +144,8 @@ public class Grid extends Group {
         return x;
     }
 
-    public void setX(int x) {
-        this.x = x;
-    }
-
     public int getY() {
         return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    public void setCell(int x, int y, Case c){
-      cases[x][y] = c;
     }
 
     public Case getCell(int x, int y){
@@ -219,12 +161,6 @@ public class Grid extends Group {
                 cases[i][j].setOnMouseDragOver(handlerDRAGING);
                 cases[i][j].setOnMouseDragReleased(handlerEND);
                 cases[i][j].setOnMousePressed(handlerPRESS);
-
-                //  cases[i][j].setOnMouseDragOver(handlerMAJ);
-                //  cases[i][j].setOnMouseDragReleased(handlerENDING);
-
-
-
             }
         }
     }
@@ -234,7 +170,6 @@ public class Grid extends Group {
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 cases[i][j] = new Case(i, j, this.hauteurCase, this.largeurCase);
-
             }
         }
         if(this.manager){
@@ -250,38 +185,16 @@ public class Grid extends Group {
                 cases[i][j].setOnDragDetected(null);
                 cases[i][j].setOnMouseDragOver(null);
                 cases[i][j].setOnMouseDragReleased(null);
-                cases[i][j].setOnMousePressed(null);
-
-                //  cases[i][j].setOnMouseDragOver(handlerMAJ);
-                //  cases[i][j].setOnMouseDragReleased(handlerENDING);
-
-
-
-            }
+                cases[i][j].setOnMousePressed(null); }
         }
     }
 
-    protected void affCircle(){
-       if(!getChildren().contains(player)){
-           getChildren().add(player);
-       }
+    void affCircle(){
+       if(!getChildren().contains(player)) getChildren().add(player);
     }
 
-    protected void unAffCircle(){
-        if(getChildren().contains(player)){
-            getChildren().remove(player);
-        }
-    }
-
-    public void setPosCircle(int x, int y){
+    void setPosCircle(int x, int y){
        player.setCenterX(x*largeurCase+largeurCase/2);
         player.setCenterY(y*hauteurCase+hauteurCase/2);
    }
-
-   public void setColorCircle(Color c){
-       player.setFill(c);
-   }
-
-
-
 }

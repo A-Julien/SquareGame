@@ -113,10 +113,10 @@ public class Server extends Console implements Runnable, RmqConfig {
      * Initialize connection to the manager
      */
     private void initConnectionRPC(){
-        try (ManagerConnection rpcInit = new ManagerConnection(this.connection, this.RPC_INIT_QUEUE_NAME, this.uniqueServeurQueue)) {
+        try {
             this.log("Requesting Initialisation from manager");
             this.log("Getting data from manager");
-            this.serverZone = rpcInit.call();
+            this.serverZone = ManagerConnection.init(this.connection, this.RPC_INIT_QUEUE_NAME, this.uniqueServeurQueue);
             this.log("Connection fully establish");
         } catch (IOException | InterruptedException | ClassNotFoundException e) {
             e.printStackTrace();
