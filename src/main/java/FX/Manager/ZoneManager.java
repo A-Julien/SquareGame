@@ -194,7 +194,7 @@ class ZoneManager extends BorderPane {
                 int index = -1;
                 find = false;
                 for (Zone zone: finalZone) {
-                    if (zone.getId() == grid.cellFXES[i][j].getZoneFx().getId()) { //TODO HUM... PB.. getid()
+                    if (zone.getId() == grid.cellFXES[i][j].getZoneFx().getId()) {
                         find  = true;
                         index++;
                         break;
