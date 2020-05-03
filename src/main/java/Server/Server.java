@@ -20,7 +20,7 @@ import java.util.concurrent.TimeoutException;
 import Task.*;
 
 
-public class Server extends Console implements Runnable, RmqConfig {
+public class Server implements Runnable, RmqConfig {
     private String SERVER_NAME;
     private String RPC_INIT_QUEUE_NAME;
     private Connection connection;
@@ -42,14 +42,15 @@ public class Server extends Console implements Runnable, RmqConfig {
 
     private TaskService taskService;
     private MapService mapService;
+    Console console;
 
 
-
-    public Server(String RPC_INIT_QUEUE_NAME, String RMQ_HOST, String SERVER_NAME) throws IOException, TimeoutException {
-        super();
+    public Server(String RPC_INIT_QUEUE_NAME, String RMQ_HOST, String SERVER_NAME, Console console) throws IOException, TimeoutException {
         this.SERVER_NAME = SERVER_NAME;
         this.RPC_INIT_QUEUE_NAME = RPC_INIT_QUEUE_NAME;
         this.RMQ_HOST = RMQ_HOST;
+        this.console = console;
+
     }
 
     @Override
@@ -268,7 +269,12 @@ public class Server extends Console implements Runnable, RmqConfig {
     }
 
     private void log(String message){
-        System.out.println("[" + this.SERVER_NAME + "] " + message);
+        if(this.console == null){
+            System.out.println("[" + this.SERVER_NAME + "] " + message);
+        } else {
+            this.console.newLog(message);
+        }
+
     }
 
 }
