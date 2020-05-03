@@ -1,5 +1,6 @@
 package Launcher;
 
+import Configuration.RmqConfig;
 import FX.Manager.MenuSelectionZone;
 import Manager.Manager;
 import javafx.application.Application;
@@ -9,12 +10,12 @@ import javafx.stage.Stage;
 
 public class LaunchManager extends Application {
     private Manager manager;
-    private static String ip = null;
 
     public void start(Stage primaryStage) {
-        //if(ip == null)  manager = new Manager(20);
-        //if(ip != null) manager = new Manager(ip,20);
-        manager = new Manager(20);
+        Parameters p = this.getParameters();
+        if(p.getRaw().size() > 1 && p.getRaw().get(0).equals("-ip")) manager = new Manager(20, p.getRaw().get(1));
+        else manager = new Manager(20, RmqConfig.RMQ_SERVER_IP);
+
         Screen screen = Screen.getPrimary();
         Rectangle2D ecran = screen.getVisualBounds();
 
@@ -30,7 +31,6 @@ public class LaunchManager extends Application {
 
 
     public static void main(String[] args) {
-        //ip = args[0];
         launch(args);
     }
 }

@@ -49,7 +49,6 @@ class ZoneManager extends BorderPane {
         tableView.setOnMousePressed(event -> {
             currentZone = zones.get(tableView.getFocusModel().getFocusedIndex());
             grid.setCurrentZone(currentZone);
-            System.out.println(currentZone);
         });
 
         TableColumn<ZoneFx, String> zoneName = new TableColumn<>("Zone");
@@ -59,7 +58,6 @@ class ZoneManager extends BorderPane {
         zoneName.setOnEditCommit((TableColumn.CellEditEvent<ZoneFx, String> event) -> {
             TablePosition<ZoneFx, String> pos = event.getTablePosition();
             String newName = event.getNewValue();
-            System.out.println("Modification en : " + newName);
             tableView.getItems().get(event.getTablePosition().getRow()).setNomZone(newName);
             refreshCellOnGrid(null);
         });
@@ -74,7 +72,6 @@ class ZoneManager extends BorderPane {
         zoneIP.setCellFactory(TextFieldTableCell.forTableColumn());
         zoneIP.setOnEditCommit((TableColumn.CellEditEvent<ZoneFx, String> event) -> {
             String newName = event.getNewValue();
-            System.out.println("Modification en : " + newName);
             tableView.getItems().get(event.getTablePosition().getRow()).setIp(newName);
         });
 

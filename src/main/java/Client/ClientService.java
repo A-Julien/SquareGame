@@ -30,18 +30,18 @@ public class ClientService  implements ClientReaction , Loggable {
 
     private static final Object monitor = new Object();
     private ClientFX clientFX;
-    private String RMQ_IP =RMQ_SERVER_IP;
+    private String RMQ_IP;
     private SimpleLogger logger;
 
     public ClientService(ClientFX clientFX, String RMQ_IP) throws IOException, TimeoutException {
         this.clientFX = clientFX;
         this.logger = new SimpleLogger("CLIENT", null);
         this.logger.addTag("SERVICE");
-        if (RMQ_IP != null) this.RMQ_IP = RMQ_IP;
+        this.RMQ_IP = RMQ_IP;
         
 
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(RMQ_SERVER_IP);
+        factory.setHost(this.RMQ_IP);
         Connection connection = factory.newConnection();
 
         this.sendChanel = connection.createChannel();

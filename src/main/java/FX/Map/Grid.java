@@ -73,7 +73,6 @@ public class Grid extends Group {
     };
 
     private EventHandler<MouseEvent> handlerDetect = event -> {
-        System.out.println("Drag la case : " + caseDebut);
         ((CellFX) event.getTarget()).startFullDrag();
     };
 
@@ -85,7 +84,6 @@ public class Grid extends Group {
 
     private EventHandler<MouseEvent> handlerEND = event -> {
         Point caseFin = ((CellFX) event.getTarget()).getPoint();
-        System.out.println(caseFin);
         zone.setStroke(Color.TRANSPARENT);
         zone.setX(0);
         zone.setY(0);

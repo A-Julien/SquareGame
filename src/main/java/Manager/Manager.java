@@ -34,10 +34,12 @@ public class Manager implements Loggable {
     private SimpleLogger logger;
     Console console = null;
 
-    public Manager(String rmqServerIp, int nbThreads) {
+    public Manager(int nbThreads, String rmqServerIp) {
         this.rmqServerIp = rmqServerIp;
         this.metaDataServer = new MetaDataServer();
         this.nbThreads = nbThreads;
+        this.logger = new SimpleLogger("MANAGER", console);
+
     }
 
     public Manager(int nbThreads) {
@@ -163,7 +165,7 @@ public class Manager implements Loggable {
             this.executor.execute(
                     new Server(
                             RmqConfig.RPC_QUEUE_NAME,
-                            RmqConfig.RMQ_SERVER_IP,
+                            this.rmqServerIp,
                             console
                             ));
         }

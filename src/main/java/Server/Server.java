@@ -42,7 +42,7 @@ public class Server implements Runnable, RmqConfig {
 
 
 
-    public Server(String RPC_INIT_QUEUE_NAME, String RMQ_HOST, Console console) {
+    public Server(String RPC_INIT_QUEUE_NAME, String RMQ_HOST, Console console){
         this.SERVER_NAME = RMQ_BASIC_SERVER_NAME + ServerID++;
         this.RPC_INIT_QUEUE_NAME = RPC_INIT_QUEUE_NAME;
         this.RMQ_HOST = RMQ_HOST;
