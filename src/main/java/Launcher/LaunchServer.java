@@ -7,19 +7,20 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 
 public class LaunchServer extends Application implements RmqConfig {
-    private static String ip = null;
 
     @Override
     public void start(Stage primaryStage) {
+         Parameters p = this.getParameters();
+
         Console console = new Console();
         primaryStage.setTitle("Serveur");
         primaryStage.setScene(console);
         primaryStage.show();
 
-        new Server(RPC_QUEUE_NAME, ip, console).run();
+        if(p.getRaw().size() > 1 && p.getRaw().get(0).equals("-ip")) new Server(RPC_QUEUE_NAME, p.getRaw().get(1), console).run();
+        else new Server(RPC_QUEUE_NAME, RmqConfig.RMQ_SERVER_IP, console).run();
     }
     public static void main(String[] args) {
-        ip = args[0];
         launch(args);
     }
 }

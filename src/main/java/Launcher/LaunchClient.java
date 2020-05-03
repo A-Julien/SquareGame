@@ -1,4 +1,5 @@
 package Launcher;
+import Configuration.RmqConfig;
 import FX.Client.ClientFX;
 import Manager.Manager;
 import javafx.application.Application;
@@ -14,17 +15,18 @@ public class LaunchClient extends Application{
 
     public void start(Stage primaryStage) throws IOException, TimeoutException {
         Screen screen = Screen.getPrimary();
+        Parameters p = this.getParameters();
 
         primaryStage.setTitle("SquaregGame - Julien ALAIMO - Olivier HUREAU");
         primaryStage.show();
-        ClientFX clientFX = new ClientFX(800,400, ip);
+        ClientFX clientFX = null;
+        if(p.getRaw().size() > 1 && p.getRaw().get(0).equals("-ip")) clientFX = new ClientFX(800,400, p.getRaw().get(1));
+        else  clientFX = new ClientFX(800,400, RmqConfig.RMQ_SERVER_IP);
         primaryStage.setScene(clientFX);
     }
 
 
     public static void main(String[] args) {
-        ip = args[0];
         launch(args);
     }
-
 }
