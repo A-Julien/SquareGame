@@ -9,7 +9,6 @@
 
 *	Github : https://github.com/A-Julien/SquareGame
 *	CI (Travis) : https://travis-ci.com/A-Julien/SquareGame
-*	MavenDoc : [mavendoc](https://a-julien.github.io/SquareGame)
 
 ## Documentation
 
