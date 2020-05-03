@@ -1,4 +1,5 @@
 package Launcher;
+import Configuration.RmqConfig;
 import FX.Client.ClientFX;
 import Manager.Manager;
 import javafx.application.Application;
@@ -17,14 +18,13 @@ public class LaunchClient extends Application{
 
         primaryStage.setTitle("SquaregGame - Julien ALAIMO - Olivier HUREAU");
         primaryStage.show();
-        ClientFX clientFX = new ClientFX(800,400, ip);
+        ClientFX clientFX = new ClientFX(800,400, RmqConfig.RMQ_SERVER_IP);
         primaryStage.setScene(clientFX);
     }
 
 
     public static void main(String[] args) {
-        ip = args[0];
+        //ip = args[0];
         launch(args);
     }
-
 }
