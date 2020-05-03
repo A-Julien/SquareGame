@@ -2,7 +2,7 @@ package Server;
 import Configuration.RmqConfig;
 import FX.Console;
 
-import Server.ComInit.ConnectionManger;
+import Server.RmqCom.ConnectionManger;
 import Server.Sevices.MapService;
 import Server.Sevices.TaskService;
 import Utils.Communication;
