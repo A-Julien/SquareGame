@@ -1,6 +1,8 @@
 package Manager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * MetaData Server For Manager
@@ -8,11 +10,11 @@ import java.util.HashMap;
  */
 class MetaDataServer {
     private Integer nbLocalSever;
-    private HashMap<String,String> serverListInfo = null;
+    private List<String> serverListInfo = null;
 
     MetaDataServer() {
         this.nbLocalSever = 0;
-        this.serverListInfo = new HashMap<>();
+        this.serverListInfo = new ArrayList<>();
     }
 
     void addServer(String ip, String port){
@@ -22,7 +24,7 @@ class MetaDataServer {
             }
             return;
         }
-        this.serverListInfo.put(ip, port);
+        this.serverListInfo.add(ip);
     }
 
     int getNbLocalSever() {
@@ -37,7 +39,7 @@ class MetaDataServer {
         return this.serverListInfo.size() + this.nbLocalSever;
     }
 
-    HashMap<String, String> getServerListInfo() {
+    List<String> getServerListInfo() {
         return serverListInfo;
     }
 }
