@@ -15,6 +15,7 @@ public class LaunchServer extends Application implements RmqConfig {
         Console console = new Console();
         primaryStage.setTitle("Serveur");
         primaryStage.setScene(console);
+        primaryStage.setMinWidth(900);
         primaryStage.show();
 
         if(p.getRaw().size() > 1 && p.getRaw().get(0).equals("-ip")) {

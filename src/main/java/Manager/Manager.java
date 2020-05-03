@@ -83,7 +83,9 @@ public class Manager implements Loggable {
         Channel channelBroadcastServer = connection.createChannel();
         channelBroadcastServer.exchangeDeclare("INITMAP", "fanout");
         this.logger.log("All server connected, sending map");
+
         channelBroadcastServer.basicPublish(RmqConfig.INITMAP_EXCHANGE, "", null, Communication.serialize(this.zoneList));
+        this.connection.close();
         if (this.metaDataServer.getNbLocalSever() != 0) this.executor.shutdown();
     }
 
