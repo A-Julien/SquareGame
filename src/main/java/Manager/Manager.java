@@ -55,14 +55,20 @@ public class Manager implements Loggable {
      * @throws MapNotSetException    just security, can not start if map not set
      * @throws ServerNotSetException just security, can not start if Server not set
      */
-    public void run() throws MapNotSetException, ServerNotSetException, IOException, TimeoutException {
+    public void run() throws MapNotSetException, ServerNotSetException, IOException {
         this.digestServer();
         this.requireMap();
         this.requireServerExtracted();
 
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(this.rmqServerIp);
-        connection = factory.newConnection();
+        try{
+            connection = factory.newConnection();
+        } catch ( Exception e ) {
+            this.logger.log("Connection Failed");
+            java.lang.System.exit(-1);
+        }
+
 
         this.initServerSubChanel();
         this.createServer();
