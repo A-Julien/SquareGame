@@ -20,8 +20,12 @@ public class LaunchClient extends Application{
         primaryStage.setTitle("SquaregGame - Julien ALAIMO - Olivier HUREAU");
         primaryStage.show();
         ClientFX clientFX = null;
-        if(p.getRaw().size() > 1 && p.getRaw().get(0).equals("-ip")) clientFX = new ClientFX(800,400, p.getRaw().get(1));
-        else  clientFX = new ClientFX(800,400, RmqConfig.RMQ_SERVER_IP);
+        if(p.getRaw().size() > 1 && p.getRaw().get(0).equals("-ip")) {
+            clientFX = new ClientFX(800,400, p.getRaw().get(1));
+        }
+        else  {
+            clientFX = new ClientFX(800,400, RmqConfig.RMQ_SERVER_IP);
+        }
         primaryStage.setScene(clientFX);
     }
 

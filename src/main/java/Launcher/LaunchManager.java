@@ -13,8 +13,12 @@ public class LaunchManager extends Application {
 
     public void start(Stage primaryStage) {
         Parameters p = this.getParameters();
-        if(p.getRaw().size() > 1 && p.getRaw().get(0).equals("-ip")) manager = new Manager(20, p.getRaw().get(1));
-        else manager = new Manager(20, RmqConfig.RMQ_SERVER_IP);
+        if(p.getRaw().size() > 1 && p.getRaw().get(0).equals("-ip")) {
+            manager = new Manager(20, p.getRaw().get(1));
+        }
+        else {
+            manager = new Manager(20, RmqConfig.RMQ_SERVER_IP);
+        }
 
         Screen screen = Screen.getPrimary();
         Rectangle2D ecran = screen.getVisualBounds();
@@ -28,7 +32,6 @@ public class LaunchManager extends Application {
         //primaryStage.setFullScreen(true);
 
     }
-
 
     public static void main(String[] args) {
         launch(args);
