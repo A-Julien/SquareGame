@@ -43,15 +43,18 @@ public class Server implements Runnable, RmqConfig {
 
     private TaskService taskService;
     private MapService mapService;
+    Console console;
     private SimpleLogger logger;
 
 
 
-    public Server(String RPC_INIT_QUEUE_NAME, String RMQ_HOST) {
+    public Server(String RPC_INIT_QUEUE_NAME, String RMQ_HOST, Console console) {
         this.SERVER_NAME = RMQ_BASIC_SERVER_NAME + ServerID++;
         this.RPC_INIT_QUEUE_NAME = RPC_INIT_QUEUE_NAME;
         this.RMQ_HOST = RMQ_HOST;
         this.logger = new SimpleLogger(this.SERVER_NAME);
+
+        this.console = console;
 
     }
 
@@ -238,5 +241,13 @@ public class Server implements Runnable, RmqConfig {
         }
     }
 
+    private void log(String message){
+        if(this.console == null){
+            System.out.println("[" + this.SERVER_NAME + "] " + message);
+        } else {
+            this.console.newLog(message);
+        }
+
+    }
 
 }

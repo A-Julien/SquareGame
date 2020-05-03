@@ -21,14 +21,14 @@ public class Manager {
     private List<Zone> zoneList = null;
     private String rmqServerIp;
     private MetaDataServer metaDataServer;
-    
+
     private int nbThreads;
     private ThreadPoolExecutor executor;
     private Connection connection;
     private Integer ServerCount = 0;
-    
+
     private final static Object monitor = new Object();
-    
+
     private SimpleLogger logger;
 
     public Manager(String rmqServerIp, int nbThreads) {
@@ -160,7 +160,8 @@ public class Manager {
             this.executor.execute(
                     new Server(
                             RmqConfig.RPC_QUEUE_NAME,
-                            RmqConfig.RMQ_SERVER_IP));
+                            RmqConfig.RMQ_SERVER_IP,
+                            null));
         }
     }
 
