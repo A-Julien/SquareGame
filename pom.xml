@@ -33,12 +33,21 @@
                 <version>3.7.1</version>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <show>private</show>
+                    <nohelp>true</nohelp>
+                </configuration>
+            </plugin>
+            <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>resource-bundles</id>
-                        <phase>site</phase>
+                        <phase>package</phase>
                         <goals>
                             <!-- produce source artifact for main project sources -->
                             <goal>resource-bundle</goal>

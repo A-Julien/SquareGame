@@ -22,6 +22,7 @@ script:
 
 after_success:
   - mvn site
+  - mvn package
   - PROJECT_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
   - ls target/site
 
