@@ -6,7 +6,7 @@ import Task.TaskCommand;
 import Utils.Direction;
 
 import Utils.Communication;
-import Utils.SimpleLogger;
+import Utils.Logger.SimpleLogger;
 import com.rabbitmq.client.Channel;
 
 import java.io.IOException;

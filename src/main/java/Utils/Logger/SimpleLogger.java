@@ -1,4 +1,4 @@
-package Utils;
+package Utils.Logger;
 
 import FX.Console;
 
@@ -21,5 +21,12 @@ public class SimpleLogger {
 
     public void addTag(String tag){
         this.tag = this.tag +"[" + tag + "]";
+    }
+
+    public void replaceTag(String tag){
+        this.tag = tag;
+    }
+    public void setConsole(FX.Console console){
+        this.console = console;
     }
 }

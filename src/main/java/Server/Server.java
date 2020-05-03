@@ -7,7 +7,7 @@ import Server.RmqCom.ConnectionManger;
 import Server.Sevices.MapService;
 import Server.Sevices.TaskService;
 import Utils.Communication;
-import Utils.SimpleLogger;
+import Utils.Logger.SimpleLogger;
 import com.rabbitmq.client.*;
 
 import java.io.IOException;

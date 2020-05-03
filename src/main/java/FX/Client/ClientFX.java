@@ -2,11 +2,12 @@ package FX.Client;
 
 import Client.ClientService;
 import Configuration.FxConfig;
+import FX.Console;
 import FX.Map.Grid;
 import Manager.Map.Cell;
 import Configuration.RmqConfig;
 import Utils.Direction;
-import Utils.SimpleLogger;
+import Utils.Logger.SimpleLogger;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -31,6 +32,7 @@ public class ClientFX extends Scene implements RmqConfig {
     
     private SimpleLogger logger;
 
+    private Console console;
 
     /**
      * Init FX action handler and launch FX for client.
@@ -43,16 +45,21 @@ public class ClientFX extends Scene implements RmqConfig {
      */
     public ClientFX(double width, double height) throws IOException, TimeoutException {
         super(new BorderPane(),  width,  height);
-        this.logger = new SimpleLogger("CLIENT", null);
+        this.console = new Console();
+        this.logger = new SimpleLogger("CLIENT", this.console);
         this.logger.addTag("FX");
+
 
         BorderPane borderPane = (BorderPane) this.getRoot();
 
-        this.grid = new Grid(FxConfig.height,FxConfig.width,height*0.9,width*0.9, false);
+        this.grid = new Grid(FxConfig.height,FxConfig.width,width/2*0.85,width/2*0.85, false);
 
         this.pos = new Cell(0,0);
 
-        borderPane.setCenter(grid);
+        BorderPane topBorder = new BorderPane();
+        topBorder.setCenter(grid);
+        borderPane.setTop(topBorder);
+        borderPane.setCenter(console.getScrollPane());
 
         this.alert1 = new Alert(Alert.AlertType.INFORMATION);
         this.alert1.setTitle("Regardez aux alentours !");
@@ -97,6 +104,7 @@ public class ClientFX extends Scene implements RmqConfig {
         this.addEventFilter(KeyEvent.KEY_RELEASED, clavier);
         this.grid.affCircle();
         this.clientService = new ClientService(this);
+        clientService.setConsole(console);
 
     }
 

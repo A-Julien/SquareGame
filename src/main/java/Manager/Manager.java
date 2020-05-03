@@ -1,9 +1,11 @@
 package Manager;
 
 import Configuration.RmqConfig;
+import FX.Console;
 import Server.Server;
 import Utils.Communication;
-import Utils.SimpleLogger;
+import Utils.Logger.Loggable;
+import Utils.Logger.SimpleLogger;
 import com.rabbitmq.client.*;
 import Exception.MapNotSetException;
 import Exception.ServerNotSetException;
@@ -16,7 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
-public class Manager {
+public class Manager implements Loggable {
     private int zoneCounter = 0;
     private List<Zone> zoneList = null;
     private String rmqServerIp;
@@ -30,6 +32,7 @@ public class Manager {
     private final static Object monitor = new Object();
 
     private SimpleLogger logger;
+    Console console = null;
 
     public Manager(String rmqServerIp, int nbThreads) {
         this.rmqServerIp = rmqServerIp;
@@ -41,7 +44,7 @@ public class Manager {
         this.rmqServerIp = RmqConfig.RMQ_SERVER_IP;
         this.metaDataServer = new MetaDataServer();
         this.nbThreads = nbThreads;
-        this.logger = new SimpleLogger("MANAGER", null);
+        this.logger = new SimpleLogger("MANAGER", console);
     }
 
     /**
@@ -161,7 +164,8 @@ public class Manager {
                     new Server(
                             RmqConfig.RPC_QUEUE_NAME,
                             RmqConfig.RMQ_SERVER_IP,
-                            null));
+                            console
+                            ));
         }
     }
 
@@ -198,5 +202,11 @@ public class Manager {
     private void requireServerExtracted() throws ServerNotSetException {
         if (this.metaDataServer.getServerListInfo() == null)
             throw new ServerNotSetException("No configuration server found");
+    }
+
+    @Override
+    public void setConsole(FX.Console console){
+        this.console = console;
+        logger.setConsole(console);
     }
 }

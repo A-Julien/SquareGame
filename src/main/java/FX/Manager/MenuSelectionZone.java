@@ -1,11 +1,13 @@
 package FX.Manager;
 
 import Configuration.FxConfig;
+import FX.Console;
 import FX.Manager.ZoneManager;
 import FX.Map.Grid;
 import Manager.Manager;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.BorderPane;
@@ -18,12 +20,15 @@ import javafx.stage.Window;
 public class MenuSelectionZone extends Scene {
     private BorderPane borderPane;
     private ZoneManager zoneManager;
-
+    private Console console;
     public MenuSelectionZone(double largeur, double hauteur, Manager manager){
         super(new BorderPane(),  largeur,  hauteur);
         Window primary = this.getWindow();
         borderPane = (BorderPane) this.getRoot();
 
+        this.console = new Console();
+
+        manager.setConsole(console);
         Grid grid = new Grid(FxConfig.height, FxConfig.width, hauteur * 0.95, largeur / 2, true);
         borderPane.setCenter(grid);
         zoneManager = new ZoneManager(grid, manager);
@@ -39,6 +44,7 @@ public class MenuSelectionZone extends Scene {
             alert.setHeaderText("All server connected");
             alert.setContentText("Ready to start");
             borderPane.setRight(null);
+            borderPane.setLeft(console.getScrollPane());
 
             alert.showAndWait();
         };

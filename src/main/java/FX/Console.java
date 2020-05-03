@@ -17,14 +17,20 @@ public class Console extends Scene  {
     private final String blackConsole = "-fx-background: rgb(0,0,0);\n -fx-background-color:transparent";
     Color currentTextColor;
     public Console() {
-
         super(new ScrollPane(), 400, 400);
         this.scrollPane = (ScrollPane) this.getRoot();
+        scrollPane.prefWidth(800);
+        //scrollPane.prefHeight(400);
+        scrollPane.minHeight(200);
         shortDateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
         this.setBlack();
          this.vBox = new VBox();
          scrollPane.setContent(vBox);
         newLog("Terminal");
+    }
+
+    public ScrollPane getScrollPane() {
+        return scrollPane;
     }
 
     private void addLogs(String s) {
