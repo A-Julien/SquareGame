@@ -10,9 +10,16 @@ import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Init the connection with the manager
+ */
 public abstract class ConnectionManger implements AutoCloseable {
 
-    public static Integer init(Connection connection, String requestQueueName, String uniqueQueueServer) throws IOException, InterruptedException, ClassNotFoundException {
+    public static Integer init(
+            Connection connection,
+            String requestQueueName,
+            String uniqueQueueServer) throws IOException, InterruptedException, ClassNotFoundException {
+
         Channel channel = connection.createChannel();
         final String corrId = UUID.randomUUID().toString();
 

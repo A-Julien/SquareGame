@@ -9,13 +9,12 @@ import javafx.stage.Stage;
 public class LaunchServer extends Application implements RmqConfig {
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         Console console = new Console();
         primaryStage.setTitle("Serveur");
         primaryStage.setScene(console);
         primaryStage.show();
-        Server server = new Server(RPC_QUEUE_NAME, RMQ_SERVER_IP , "Manual Launched Server ", console);
 
-       // server.run();
+        new Server(RPC_QUEUE_NAME, RMQ_SERVER_IP,console).run();
     }
 }

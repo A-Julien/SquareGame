@@ -3,6 +3,7 @@ package Manager;
 import Configuration.RmqConfig;
 import Server.Server;
 import Utils.Communication;
+import Utils.SimpleLogger;
 import com.rabbitmq.client.*;
 import Exception.MapNotSetException;
 import Exception.ServerNotSetException;
@@ -20,11 +21,15 @@ public class Manager {
     private List<Zone> zoneList = null;
     private String rmqServerIp;
     private MetaDataServer metaDataServer;
+
     private int nbThreads;
     private ThreadPoolExecutor executor;
     private Connection connection;
     private Integer ServerCount = 0;
+
     private final static Object monitor = new Object();
+
+    private SimpleLogger logger;
 
     public Manager(String rmqServerIp, int nbThreads) {
         this.rmqServerIp = rmqServerIp;
@@ -36,6 +41,7 @@ public class Manager {
         this.rmqServerIp = RmqConfig.RMQ_SERVER_IP;
         this.metaDataServer = new MetaDataServer();
         this.nbThreads = nbThreads;
+        this.logger = new SimpleLogger("MANAGER", null);
     }
 
     /**
@@ -59,7 +65,7 @@ public class Manager {
 
         Channel channelBroadcastServer = connection.createChannel();
         channelBroadcastServer.exchangeDeclare("INITMAP", "fanout");
-        System.out.println("[MANAGER] All server connected, sending map");
+        this.logger.log("All server connected, sending map");
         channelBroadcastServer.basicPublish(RmqConfig.INITMAP_EXCHANGE, "", null, Communication.serialize(this.zoneList));
         if (this.metaDataServer.getNbLocalSever() != 0) this.executor.shutdown();
     }
@@ -94,7 +100,7 @@ public class Manager {
 
             channel.basicQos(1);
 
-            System.out.println("[MANAGER] Manager connected to RmqServer");
+            this.logger.log("Manager connected to RmqServer");
 
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 AMQP.BasicProperties replyProps = new AMQP.BasicProperties
@@ -103,14 +109,14 @@ public class Manager {
                         .build();
                 String message = new String(delivery.getBody(), "UTF-8");
 
-                System.out.println("[MANAGER] New Server found  " + message);
+                this.logger.log("New Server found  " + message);
 
                 this.setServerZone(message);
                 channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, Communication.serialize(this.giveZone()));
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
 
                 ServerCount++;
-                System.out.println("[MANAGER] " + ServerCount + " server found of " + this.metaDataServer.getNbServer());
+                this.logger.log(ServerCount + " server found of " + this.metaDataServer.getNbServer());
 
                 if (ServerCount == this.metaDataServer.getNbServer()) {
                     synchronized (monitor) {
@@ -119,7 +125,7 @@ public class Manager {
                 }
             };
 
-            System.out.println("[MANAGER] Awaiting " + this.metaDataServer.getNbServer() + " RPC requests from Server");
+            this.logger.log("Awaiting " + this.metaDataServer.getNbServer() + " RPC requests from Server");
             channel.basicConsume(RmqConfig.RPC_QUEUE_NAME, false, deliverCallback, (consumerTag -> { }));
     }
 
@@ -145,23 +151,17 @@ public class Manager {
 
     /**
      * Create Server threads
-     *
-     * @throws IOException
-     * @throws TimeoutException
      */
-    private void createServer() throws IOException, TimeoutException {
+    private void createServer(){
         if (this.metaDataServer.getNbLocalSever() == 0) return;
-        System.out.println("[MANAGER] Launching local server");
+        this.logger.log("Launching local server");
         this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(this.nbThreads);
         for (int i = 1; i <= this.metaDataServer.getNbLocalSever(); i++) {
             this.executor.execute(
                     new Server(
                             RmqConfig.RPC_QUEUE_NAME,
                             RmqConfig.RMQ_SERVER_IP,
-                            "rmq-server-" +  i ,
-                            null
-                    )
-            );
+                            null));
         }
     }
 

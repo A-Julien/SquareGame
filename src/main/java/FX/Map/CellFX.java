@@ -7,11 +7,14 @@ import javafx.scene.shape.StrokeType;
 
 import java.awt.*;
 
-public class Case extends Rectangle {
+/**
+ * Definition of cell for FX
+ */
+public class CellFX extends Rectangle {
     private Point point;
     private ZoneFx zoneFx;
 
-    Case(int x, int y, double height, double width) {
+    CellFX(int x, int y, double height, double width) {
         point = new Point(x, y);
 
         setX(x * width);
@@ -21,11 +24,10 @@ public class Case extends Rectangle {
         setFill(Color.WHITE);
         setStrokeType(StrokeType.CENTERED);
         setStroke(Color.BLACK);
-
     }
 
     
-    public Point getPoint() {
+    Point getPoint() {
         return point;
     }
 
@@ -36,11 +38,6 @@ public class Case extends Rectangle {
     public void setZone(ZoneFx zone) {
         this.zoneFx = zone;
         colorSwap(zoneFx.getZoneColor());
-    }
-
-    public void removeZone() {
-        zoneFx = null;
-        colorSwap(Color.WHITE);
     }
 
     public ZoneFx getZoneFx() {

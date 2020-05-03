@@ -6,6 +6,7 @@ import FX.Map.Grid;
 import Manager.Map.Cell;
 import Configuration.RmqConfig;
 import Utils.Direction;
+import Utils.SimpleLogger;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -27,14 +28,27 @@ public class ClientFX extends Scene implements RmqConfig {
     private Cell pos;
 
     private ClientService clientService;
+    
+    private SimpleLogger logger;
 
 
-    public ClientFX(double largeur, double hauteur) throws IOException, TimeoutException {
-        super(new BorderPane(),  largeur,  hauteur);
+    /**
+     * Init FX action handler and launch FX for client.
+     * Start Client Services
+     *
+     * @param width
+     * @param height
+     * @throws IOException
+     * @throws TimeoutException
+     */
+    public ClientFX(double width, double height) throws IOException, TimeoutException {
+        super(new BorderPane(),  width,  height);
+        this.logger = new SimpleLogger("CLIENT", null);
+        this.logger.addTag("FX");
 
         BorderPane borderPane = (BorderPane) this.getRoot();
 
-        this.grid = new Grid(FxConfig.height,FxConfig.width,hauteur*0.9,largeur*0.9, false);
+        this.grid = new Grid(FxConfig.height,FxConfig.width,height*0.9,width*0.9, false);
 
         this.pos = new Cell(0,0);
 
@@ -58,13 +72,10 @@ public class ClientFX extends Scene implements RmqConfig {
             Cell p = new Cell(0,0);
 
             if(key.getCode()== KeyCode.Q || key.getCode()== KeyCode.LEFT) {
-                System.out.println("Déplacement GAUCHE");
              direction = Direction.LEFT;
             } else if(key.getCode()== KeyCode.D || key.getCode()== KeyCode.RIGHT) {
-                System.out.println("Déplacement droite");
                 direction = Direction.RIGHT;
             } else if(key.getCode()== KeyCode.Z || key.getCode()== KeyCode.UP) {
-                System.out.println("Déplacement Haut");
                 direction = Direction.UP;
             } else if(key.getCode()== KeyCode.S || key.getCode()== KeyCode.DOWN) {
                 direction = Direction.DOWN;
@@ -72,11 +83,12 @@ public class ClientFX extends Scene implements RmqConfig {
             } else {
                 return;
             }
+            this.logger.log("Moving " + direction.toString());
 
             try {
                 this.clientService.handleMovement(direction);
             } catch (IOException e) {
-                System.out.println("Impossible de communiquer avec le serveur");
+                this.logger.log("Can not comunicate with server ");
                 e.printStackTrace();
             }
 
@@ -88,27 +100,47 @@ public class ClientFX extends Scene implements RmqConfig {
 
     }
 
+    /**
+     * Show alert when client send hello
+     */
     public void showAlert2(){
         Platform.runLater(alert2::show);
     }
 
+    /**
+     * Show response when client send hello
+     */
     public void showAlert1(){
         Platform.runLater(alert1::show);
     }
 
-    public void moveCircle(Cell p){
-        pos = p;
+    /**
+     * Move circle on map
+     *
+     * @param cell position to move
+     */
+    public void moveCircle(Cell cell){
+        pos = cell;
         grid.setPosCircle(pos.getX(), pos.getY());
     }
 
+    /**
+     * Set circle to a position
+     * @param x coord
+     * @param y coord
+     */
     public void setPosCircle(int x, int y){
         this.grid.setPosCircle(x, y);
     }
 
-    public void setColorGrid(javafx.scene.paint.Color c){
+    /**
+     * change grid color chen client change server
+     * @param color the color
+     */
+    public void setColorGrid(javafx.scene.paint.Color color){
         for(int i = 0; i < grid.getX(); i++){
             for(int j = 0; j < grid.getY(); j++){
-                grid.getCell(i,j).colorSwap(c);
+                grid.getCell(i,j).colorSwap(color);
             }
         }
 

@@ -11,8 +11,11 @@ import javafx.scene.shape.StrokeType;
 
 import java.awt.Point;
 
+/**
+ * Define the grid
+ */
 public class Grid extends Group {
-    public Case[][] cases;
+    public CellFX[][] cellFXES;
     private Group grille = new Group();
     private Rectangle zone = new Rectangle();
     private double largeurCase, hauteurCase;
@@ -55,24 +58,23 @@ public class Grid extends Group {
         grille.getChildren().removeAll();
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
-                grille.getChildren().add(cases[i][j]);
+                grille.getChildren().add(cellFXES[i][j]);
             }
         }
     }
 
-
     private EventHandler<MouseEvent> handlerCLICK = event -> colorerZone(
-            ((Case) event.getTarget()).getPoint() ,((Case) event.getTarget()).getPoint()
+            ((CellFX) event.getTarget()).getPoint() ,((CellFX) event.getTarget()).getPoint()
     );
 
     private EventHandler<MouseEvent> handlerPRESS = event -> {
         debutSelection = new Point((int)event.getX(), (int) event.getY());
-        caseDebut = ((Case) event.getTarget()).getPoint();
+        caseDebut = ((CellFX) event.getTarget()).getPoint();
     };
 
     private EventHandler<MouseEvent> handlerDetect = event -> {
         System.out.println("Drag la case : " + caseDebut);
-        ((Case) event.getTarget()).startFullDrag();
+        ((CellFX) event.getTarget()).startFullDrag();
     };
 
 
@@ -82,7 +84,7 @@ public class Grid extends Group {
     };
 
     private EventHandler<MouseEvent> handlerEND = event -> {
-        Point caseFin = ((Case) event.getTarget()).getPoint();
+        Point caseFin = ((CellFX) event.getTarget()).getPoint();
         System.out.println(caseFin);
         zone.setStroke(Color.TRANSPARENT);
         zone.setX(0);
@@ -129,7 +131,7 @@ public class Grid extends Group {
 
         for(int i = minX; i <= maxX; i++){
             for(int j = minY; j <= maxY; j++){
-                cases[i][j].setZone(currentZone);
+                cellFXES[i][j].setZone(currentZone);
             }
         }
     }
@@ -146,28 +148,28 @@ public class Grid extends Group {
         return y;
     }
 
-    public Case getCell(int x, int y){
-       return cases[x][y];
+    public CellFX getCell(int x, int y){
+       return cellFXES[x][y];
     }
 
     private void handlerSelection(){
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
 
-                cases[i][j].setOnMouseClicked(handlerCLICK);
-                cases[i][j].setOnDragDetected(handlerDetect);
-                cases[i][j].setOnMouseDragOver(handlerDRAGING);
-                cases[i][j].setOnMouseDragReleased(handlerEND);
-                cases[i][j].setOnMousePressed(handlerPRESS);
+                cellFXES[i][j].setOnMouseClicked(handlerCLICK);
+                cellFXES[i][j].setOnDragDetected(handlerDetect);
+                cellFXES[i][j].setOnMouseDragOver(handlerDRAGING);
+                cellFXES[i][j].setOnMouseDragReleased(handlerEND);
+                cellFXES[i][j].setOnMousePressed(handlerPRESS);
             }
         }
     }
 
     private void createCell(){
-        this.cases = new Case[x][y];
+        this.cellFXES = new CellFX[x][y];
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
-                cases[i][j] = new Case(i, j, this.hauteurCase, this.largeurCase);
+                cellFXES[i][j] = new CellFX(i, j, this.hauteurCase, this.largeurCase);
             }
         }
         if(this.manager){
@@ -179,11 +181,11 @@ public class Grid extends Group {
     public void rmHandlerSelection(){
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
-                cases[i][j].setOnMouseClicked(handlerShowInfoCell);
-                cases[i][j].setOnDragDetected(null);
-                cases[i][j].setOnMouseDragOver(null);
-                cases[i][j].setOnMouseDragReleased(null);
-                cases[i][j].setOnMousePressed(null); }
+                cellFXES[i][j].setOnMouseClicked(handlerShowInfoCell);
+                cellFXES[i][j].setOnDragDetected(null);
+                cellFXES[i][j].setOnMouseDragOver(null);
+                cellFXES[i][j].setOnMouseDragReleased(null);
+                cellFXES[i][j].setOnMousePressed(null); }
         }
     }
 

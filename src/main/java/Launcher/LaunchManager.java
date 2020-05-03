@@ -7,8 +7,6 @@ import javafx.geometry.Rectangle2D;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import static javafx.application.Application.launch;
-
 public class LaunchManager extends Application {
     private Manager manager;
 

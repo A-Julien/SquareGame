@@ -12,6 +12,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Window;
 
 
+/**
+ * Manage FX zone selection
+ */
 public class MenuSelectionZone extends Scene {
     private BorderPane borderPane;
     private ZoneManager zoneManager;
@@ -29,14 +32,12 @@ public class MenuSelectionZone extends Scene {
 
         grid.setCurrentZone(zoneManager.getCurrentZone());
 
-
-
         EventHandler<ActionEvent> eventLaunch= e -> {
             zoneManager.eventLaunch();
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Initialisation");
-            alert.setHeaderText("Initialisation réussi");
-            alert.setContentText("Tout les serveurs se sont bien connecté");
+            alert.setHeaderText("All server connected");
+            alert.setContentText("Ready to start");
             borderPane.setRight(null);
 
             alert.showAndWait();
