@@ -1,4 +1,5 @@
 package Server;
+
 import Configuration.RmqConfig;
 import FX.Console;
 
