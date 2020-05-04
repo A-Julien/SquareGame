@@ -175,7 +175,7 @@ class ZoneManager extends BorderPane {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Initialisation");
         alert.setHeaderText("Waiting server..");
-        alert.showAndWait();
+        alert.show();
 
         this.logger.log("Build map");
         setTop(null);
