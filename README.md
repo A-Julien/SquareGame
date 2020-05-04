@@ -1,4 +1,4 @@
-#  DevOps
+#  SquareGame
 
 
 [![Build Status](https://travis-ci.com/A-Julien/SquareGame.svg?branch=master)](https://travis-ci.com/A-Julien/SquareGame) 
