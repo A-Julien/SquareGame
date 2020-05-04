@@ -182,7 +182,6 @@ class ZoneManager extends BorderPane {
 
         grid.rmHandlerSelection();
 
-
         ArrayList<Zone> finalZone = new ArrayList();
         boolean find = false;
         Zone z = null;
